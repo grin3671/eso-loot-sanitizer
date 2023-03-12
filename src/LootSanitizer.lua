@@ -4,7 +4,7 @@ ThisAddOn = {}
 -- This isn't strictly necessary, but we'll use this string later when registering events.
 -- Better to define it in a single place rather than retyping the same string.
 ThisAddOn.name = "LootSanitizer"
-ThisAddOn.version = "0.9.96"
+ThisAddOn.version = "0.11.3"
 ThisAddOn.author = "grin3671"
 
 ThisAddOn.defaultSettings =
@@ -21,6 +21,12 @@ ThisAddOn.defaultSettings =
   burnLockpickStackSaved = 3,
   burnBait = false,
   burnBaitStackSaved = 1,
+  burnCommonGlyph = false,
+  burnRunePotency = false,
+  burnRuneEssence = false,
+  saveRuneEssenceForDaily = true,
+  maxBurnedStack = 10,
+  maxBurnedPrice = 100,
 }
 
 ThisAddOn.trashRaceMaterial =
@@ -92,6 +98,19 @@ ThisAddOn.trashBait =
   42870,
   42871,
   42872,
+}
+
+ThisAddOn.savedItems =
+{
+  68342,  -- Хакейджо
+  166045, -- Индеко
+}
+
+ThisAddOn.dailyRunes =
+{
+  45831,  -- Око
+  45832,  -- Мако
+  45833,  -- Дени
 }
 
 -- TODO?
@@ -362,6 +381,26 @@ function ThisAddOn.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewItem,
     DestroyItem(bagIndex, slotIndex)
   end
 
+  -- Удаление лишних глифов
+  if ThisAddOn.accountSettings.burnCommonGlyph and (itemType == 20 or itemType == 21) and stackCountChange == 1 and IsItemLinkCrafted(itemLink) == false and quality == 1 then
+    ThisAddOn:ChatNotification(itemLink)
+    DestroyItem(bagIndex, slotIndex)
+  end
+
+  -- Удаление рун силы (квадратные)
+  if ThisAddOn.accountSettings.burnRunePotency and itemType == 51 and stackCountChange <= ThisAddOn.accountSettings.maxBurnedStack and itemEx2 ~= 10 then
+    ThisAddOn:ChatNotification(itemLink)
+    DestroyItem(bagIndex, slotIndex)
+  end
+
+  -- Удаление рун сущности (треугольные)
+  if ThisAddOn.accountSettings.burnRuneEssence and itemType == 53 and stackCountChange <= ThisAddOn.accountSettings.maxBurnedStack and ThisAddOn.HasValue(ThisAddOn.savedItems, itemId) == false then
+    if ThisAddOn.accountSettings.saveRuneEssenceForDaily and ThisAddOn.HasValue(ThisAddOn.dailyRunes, itemId) then
+      do return end
+    end
+    ThisAddOn:ChatNotification(itemLink)
+    DestroyItem(bagIndex, slotIndex)
+  end
 end
 
 
@@ -386,7 +425,7 @@ end
 
 
 
--- integer eventCode, string lootedBy, string itemLink, integer quantity, integer itemSound, lootType lootType, bool isStolen
+-- INACTIVE!! integer eventCode, string lootedBy, string itemLink, integer quantity, integer itemSound, lootType lootType, bool isStolen
 function ThisAddOn.OnLootReceived(eventCode, lootedBy, itemLink, itemQuantity, itemSound, lootType, isStolen)
 
   if (lootType == LOOT_TYPE_ITEM) then
@@ -606,6 +645,53 @@ function ThisAddOn:addSettingsMenu ()
     [26] = {
       type = "description",
       text = [[|cc5c29eНовые наживки будут удаляться, после того как в инвентаре наберётся указанное количество стаков.|r
+      ]],
+    },
+    [27] = {
+      type = "header",
+      name = "Глифы",
+    },
+    [28] = {
+      type = "checkbox",
+      name = "Удаление глифов",
+      default = ThisAddOn.defaultSettings.burnCommonGlyph,
+      getFunc = function() return ThisAddOn.accountSettings.burnCommonGlyph end,
+      setFunc = function(value) ThisAddOn.accountSettings.burnCommonGlyph = value end,
+    },
+    [29] = {
+      type = "description",
+      text = [[|cc5c29eУдаление доспешных и оружейных глифов обычной редкости. Предметы созданные игроками удаляться не будут.|r
+      ]],
+    },
+    [30] = {
+      type = "header",
+      name = "Руны",
+    },
+    [31] = {
+      type = "checkbox",
+      name = "Удаление рун силы",
+      default = ThisAddOn.defaultSettings.burnRunePotency,
+      getFunc = function() return ThisAddOn.accountSettings.burnRunePotency end,
+      setFunc = function(value) ThisAddOn.accountSettings.burnRunePotency = value end,
+    },
+    [32] = {
+      type = "checkbox",
+      name = "Удаление рун сущности",
+      default = ThisAddOn.defaultSettings.burnRuneEssence,
+      getFunc = function() return ThisAddOn.accountSettings.burnRuneEssence end,
+      setFunc = function(value) ThisAddOn.accountSettings.burnRuneEssence = value end,
+    },
+    [33] = {
+      type = "checkbox",
+      name = "Сохранять руны для дейликов",
+      default = ThisAddOn.defaultSettings.saveRuneEssenceForDaily,
+      getFunc = function() return ThisAddOn.accountSettings.saveRuneEssenceForDaily end,
+      setFunc = function(value) ThisAddOn.accountSettings.saveRuneEssenceForDaily = value end,
+      disabled = function() return not ThisAddOn.accountSettings.burnRuneEssence end,
+    },
+    [34] = {
+      type = "description",
+      text = [[|cc5c29eУдаляются все квадратные руны силы ниже 10 уровня. Треугольные руны сущности |H0:item:68342:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:166045:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h удаляться не будут. Для ежедневных ремесленных заданий будут сохраняться руны сущности |H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h, |H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h.|r
       ]],
     },
   }
