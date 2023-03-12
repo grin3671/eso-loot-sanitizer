@@ -4,7 +4,7 @@ ThisAddOn = {}
 -- This isn't strictly necessary, but we'll use this string later when registering events.
 -- Better to define it in a single place rather than retyping the same string.
 ThisAddOn.name = "LootSanitizer"
-ThisAddOn.version = "0.11.3"
+ThisAddOn.version = "0.11.5"
 ThisAddOn.author = "grin3671"
 
 ThisAddOn.defaultSettings =
@@ -104,6 +104,7 @@ ThisAddOn.savedItems =
 {
   68342,  -- Хакейджо
   166045, -- Индеко
+  45838, -- Ракейпа
 }
 
 ThisAddOn.dailyRunes =
@@ -382,7 +383,7 @@ function ThisAddOn.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewItem,
   end
 
   -- Удаление лишних глифов
-  if ThisAddOn.accountSettings.burnCommonGlyph and (itemType == 20 or itemType == 21) and stackCountChange == 1 and IsItemLinkCrafted(itemLink) == false and quality == 1 then
+  if ThisAddOn.accountSettings.burnCommonGlyph and (itemType == 20 or itemType == 21 or itemType == 26) and stackCountChange == 1 and IsItemLinkCrafted(itemLink) == false and quality == 1 then
     ThisAddOn:ChatNotification(itemLink)
     DestroyItem(bagIndex, slotIndex)
   end
@@ -660,7 +661,7 @@ function ThisAddOn:addSettingsMenu ()
     },
     [29] = {
       type = "description",
-      text = [[|cc5c29eУдаление доспешных и оружейных глифов обычной редкости. Предметы созданные игроками удаляться не будут.|r
+      text = [[|cc5c29eУдаление доспешных, оружейных и ювелирных глифов обычной редкости. Предметы созданные игроками удаляться не будут.|r
       ]],
     },
     [30] = {
@@ -691,7 +692,7 @@ function ThisAddOn:addSettingsMenu ()
     },
     [34] = {
       type = "description",
-      text = [[|cc5c29eУдаляются все квадратные руны силы ниже 10 уровня. Треугольные руны сущности |H0:item:68342:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:166045:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h удаляться не будут. Для ежедневных ремесленных заданий будут сохраняться руны сущности |H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h, |H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h.|r
+      text = [[|cc5c29eУдаляются все квадратные руны силы ниже 10 уровня. Треугольные руны сущности |H0:item:68342:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h, |H0:item:166045:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:45838:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h удаляться не будут. Для ежедневных ремесленных заданий будут сохраняться руны сущности |H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h, |H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h.|r
       ]],
     },
   }
