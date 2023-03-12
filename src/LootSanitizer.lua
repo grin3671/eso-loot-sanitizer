@@ -4,7 +4,7 @@ ThisAddOn = {}
 -- This isn't strictly necessary, but we'll use this string later when registering events.
 -- Better to define it in a single place rather than retyping the same string.
 ThisAddOn.name = "LootSanitizer"
-ThisAddOn.version = "0.11.3"
+ThisAddOn.version = "0.11.5"
 ThisAddOn.author = "grin3671"
 
 ThisAddOn.defaultSettings =
