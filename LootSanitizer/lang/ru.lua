@@ -1,5 +1,6 @@
 ZO_CreateStringId("SI_LOOTSANITIZER_NAME"                        , "LootSanitizer")
 ZO_CreateStringId("SI_LOOTSANITIZER_ACTION"                      , "уничтожил")
+ZO_CreateStringId("SI_LOOTSANITIZER_BINDACTION"                  , "привязал")
 
 ZO_CreateStringId("SI_LOOTSANITIZER_WARNING"                     , "|cff0000Внимание!|r Удалённые предметы нельзя вернуть.")
 

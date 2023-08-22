@@ -1,5 +1,6 @@
 ZO_CreateStringId("SI_LOOTSANITIZER_NAME"                        , "LootSanitizer")
 ZO_CreateStringId("SI_LOOTSANITIZER_ACTION"                      , "destroed")
+ZO_CreateStringId("SI_LOOTSANITIZER_BINDACTION"                  , "binded")
 
 ZO_CreateStringId("SI_LOOTSANITIZER_WARNING"                     , "|cff0000Attention!|r Deleted items cannot be returned.")
 
