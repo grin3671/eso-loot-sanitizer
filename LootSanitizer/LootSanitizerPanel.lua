@@ -73,7 +73,7 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "description",
-      text = [[|cc5c29eАвтоматически привязывать новую экипировку выбранного качества для добавления в коллекцию.|r
+      text = [[|cc5c29eАвтоматически привязывать новую экипировку выбранного качества для добавления в коллекцию. Не влияет на BoP-предметы.|r
       ]],
     },
     -- COMPANION ITEMS
@@ -118,6 +118,14 @@ function LootSanitizer:addSettingsMenu ()
       setFunc = function(value) LootSanitizer.settings.burnRaceMotif = value end,
     },
     {
+      type = "checkbox",
+      name = "Автоматически учить выбранные мотивы",
+      tooltip = "Выбранные ремесленные мотивы, если они неизвестны текущему персонажу, будут автоматически выучены.",
+      default = LootSanitizer.defaults.autoLearnRaceMotif,
+      getFunc = function() return LootSanitizer.settings.autoLearnRaceMotif end,
+      setFunc = function(value) LootSanitizer.settings.autoLearnRaceMotif = value end,
+    },
+    {
       type = "description",
       text = [[|cc5c29eСтандартными считаются стили 9-ти стандартных рас, доступных игрокам. Редкими — Варварский, Древнеэльфийский, Даэдрический и Первобытный.|r
       ]],
@@ -153,7 +161,7 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "description",
-      text = [[
+      text = [[|cc5c29eВы можете предотвратить удаление ингридиентов с помощью режима отслеживания, используя аддон «ESO Master Recipe List».|r
       ]],
     },
     {
@@ -271,6 +279,132 @@ function LootSanitizer:addSettingsMenu ()
     {
       type = "description",
       text = [[|cc5c29eУдаление предметов из категории «Мусор», которые стоят 1 золотую. К примеру, |H0:item:57660:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h.|r
+      ]],
+    },
+    {
+      type = "header",
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t " .. GetString(SI_LOOTSANITIZER_JUNK_HEADER),
+    },
+    {
+      type = "description",
+      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_JUNK_DESCRIPTION) .. "|r",
+    },
+    {
+      type = "checkbox",
+      name = "Обычная экипировка",
+      tooltip = "Экипировка без бонусов набора (сета) с известной особенностью",
+      default = LootSanitizer.defaults.junkNormalEquipment,
+      getFunc = function() return LootSanitizer.settings.junkNormalEquipment end,
+      setFunc = function(value) LootSanitizer.settings.junkNormalEquipment = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Экипировка на продажу",
+      tooltip = "Экипировка с особенностью «Ценность», предназначенная для продажи торговцам",
+      default = LootSanitizer.defaults.junkOrnateEquipment,
+      getFunc = function() return LootSanitizer.settings.junkOrnateEquipment end,
+      setFunc = function(value) LootSanitizer.settings.junkOrnateEquipment = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Сырье и материалы средних уровней",
+      tooltip = "Сырье и материалы не минимального и не максимального уровня",
+      default = LootSanitizer.defaults.junkMiddleRawAndMaterial,
+      getFunc = function() return LootSanitizer.settings.junkMiddleRawAndMaterial end,
+      setFunc = function(value) LootSanitizer.settings.junkMiddleRawAndMaterial = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Некрафтовые зелья",
+      default = LootSanitizer.defaults.junkNotCraftedPotion,
+      getFunc = function() return LootSanitizer.settings.junkNotCraftedPotion end,
+      setFunc = function(value) LootSanitizer.settings.junkNotCraftedPotion = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Некрафтовые яды",
+      default = LootSanitizer.defaults.junkNotCraftedPoison,
+      getFunc = function() return LootSanitizer.settings.junkNotCraftedPoison end,
+      setFunc = function(value) LootSanitizer.settings.junkNotCraftedPoison = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Некрафтовые блюда",
+      default = LootSanitizer.defaults.junkNotCraftedFood,
+      getFunc = function() return LootSanitizer.settings.junkNotCraftedFood end,
+      setFunc = function(value) LootSanitizer.settings.junkNotCraftedFood = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Некрафтовые напитки",
+      default = LootSanitizer.defaults.junkNotCraftedDrink,
+      getFunc = function() return LootSanitizer.settings.junkNotCraftedDrink end,
+      setFunc = function(value) LootSanitizer.settings.junkNotCraftedDrink = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Растворители для зелий",
+      tooltip = "Растворители для зелий любого уровня",
+      default = LootSanitizer.defaults.junkPotionSolvent,
+      getFunc = function() return LootSanitizer.settings.junkPotionSolvent end,
+      setFunc = function(value) LootSanitizer.settings.junkPotionSolvent = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Растворители для ядов",
+      tooltip = "Растворители для ядов любого уровня",
+      default = LootSanitizer.defaults.junkPoisonSolvent,
+      getFunc = function() return LootSanitizer.settings.junkPoisonSolvent end,
+      setFunc = function(value) LootSanitizer.settings.junkPoisonSolvent = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Мусор",
+      tooltip = "Предметы из категории «Мусор», предназначенные для продажи торговцам",
+      default = LootSanitizer.defaults.junkTrashItem,
+      getFunc = function() return LootSanitizer.settings.junkTrashItem end,
+      setFunc = function(value) LootSanitizer.settings.junkTrashItem = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Сокровища",
+      tooltip = "Предметы из категории «Сокровище», предназначенные для продажи торговцам (в том числе и краденные!!)",
+      default = LootSanitizer.defaults.junkTreasureItem,
+      getFunc = function() return LootSanitizer.settings.junkTreasureItem end,
+      setFunc = function(value) LootSanitizer.settings.junkTreasureItem = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Редкая рыба",
+      tooltip = "Предметы из категории «Редкая рыба», предназначенные для продажи торговцам",
+      default = LootSanitizer.defaults.junkRareFish,
+      getFunc = function() return LootSanitizer.settings.junkRareFish end,
+      setFunc = function(value) LootSanitizer.settings.junkRareFish = value end,
+    },
+    {
+      type = "checkbox",
+      name = "Трофей с монстров",
+      tooltip = "Предметы из категории «Трофей с монстра», предназначенные для продажи торговцам",
+      default = LootSanitizer.defaults.junkMonsterTrophy,
+      getFunc = function() return LootSanitizer.settings.junkMonsterTrophy end,
+      setFunc = function(value) LootSanitizer.settings.junkMonsterTrophy = value end,
+    },
+    {
+      type = "description",
+      text = [[
+      ]],
+    },
+    {
+      type = "checkbox",
+      name = "Автоматическая продажа",
+      default = LootSanitizer.defaults.autoJunkSell,
+      getFunc = function() return LootSanitizer.settings.autoJunkSell end,
+      setFunc = function(value) LootSanitizer.settings.autoJunkSell = value end,
+      disabled = true,
+    },
+    {
+      type = "description",
+      text = [[|cc5c29eАвтоматическая продажа предметов из вкладки «Хлам» торговцу.|r
       ]],
     },
     {

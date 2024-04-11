@@ -49,3 +49,6 @@ ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_CONTROL"                , "Удален
 ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_SLIDER"                 , "Сохраняемый запас наживок")
 ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_SLIDER_TOOLTIP"         , "Указываются стаки (x200).")
 ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_DESCRIPTION"            , "|cc5c29eНовые наживки будут удаляться, после того как в инвентаре наберётся указанное количество стаков.|r")
+
+ZO_CreateStringId("SI_LOOTSANITIZER_JUNK_HEADER"                 , GetString("SI_ITEMTYPEDISPLAYCATEGORY", ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
+ZO_CreateStringId("SI_LOOTSANITIZER_JUNK_DESCRIPTION"            , "Автоматический перенос предметов во вкладку «Хлам».")

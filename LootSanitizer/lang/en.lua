@@ -49,3 +49,6 @@ ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_CONTROL"                , "Delete extra
 ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_SLIDER"                 , "Guarded stock of baits")
 ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_SLIDER_TOOLTIP"         , "Stacks are indicated (x200).")
 ZO_CreateStringId("SI_LOOTSANITIZER_BAIT_DESCRIPTION"            , "|cc5c29eNew baits will be removed after the specified number of stacks is accumulated in the inventory.|r")
+
+ZO_CreateStringId("SI_LOOTSANITIZER_JUNK_HEADER"                 , GetString("SI_ITEMTYPEDISPLAYCATEGORY", ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
+ZO_CreateStringId("SI_LOOTSANITIZER_JUNK_DESCRIPTION"            , "Automatically transfer items to the Junk tab.")
