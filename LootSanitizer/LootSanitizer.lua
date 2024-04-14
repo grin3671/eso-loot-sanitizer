@@ -4,7 +4,7 @@ LootSanitizer = {}
 -- This isn't strictly necessary, but we'll use this string later when registering events.
 -- Better to define it in a single place rather than retyping the same string.
 LootSanitizer.name = "LootSanitizer"
-LootSanitizer.version = "0.16.0"
+LootSanitizer.version = "0.16.1"
 LootSanitizer.author = "grin3671"
 
 LootSanitizer.enabled = 1
