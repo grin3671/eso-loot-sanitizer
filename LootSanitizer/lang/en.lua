@@ -2,7 +2,12 @@ ZO_CreateStringId("SI_LOOTSANITIZER_NAME"                        , "LootSanitize
 ZO_CreateStringId("SI_LOOTSANITIZER_ACTION"                      , "destroed")
 ZO_CreateStringId("SI_LOOTSANITIZER_BINDACTION"                  , "binded")
 
-ZO_CreateStringId("SI_LOOTSANITIZER_WARNING"                     , "|cff0000Attention!|r |cc5c29eDeleted items cannot be returned.|r")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_JUNK_ON"           , "|t30:30:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t Marks as junk")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_JUNK_OFF"          , "|t30:30:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t Stops automarking")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_BURN_ON"           , "|t30:30:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t Always |cff0000destoy|r")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_BURN_OFF"          , "|t30:30:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t Stops autodestroying")
+
+ZO_CreateStringId("SI_LOOTSANITIZER_WARNING"                     , "|cff0000Attention!|r |cc5c29eDestroed items cannot be returned.|r")
 
 ZO_CreateStringId("SI_LOOTSANITIZER_ITEM_CONTROL"                , "Delete trash items")
 ZO_CreateStringId("SI_LOOTSANITIZER_ITEM_CONTROL_NO"             , "Nope")

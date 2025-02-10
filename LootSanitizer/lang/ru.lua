@@ -2,6 +2,11 @@ ZO_CreateStringId("SI_LOOTSANITIZER_NAME"                        , "LootSanitize
 ZO_CreateStringId("SI_LOOTSANITIZER_ACTION"                      , "уничтожил")
 ZO_CreateStringId("SI_LOOTSANITIZER_BINDACTION"                  , "привязал")
 
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_JUNK_ON"           , "|t30:30:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t Отмечать как хлам")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_JUNK_OFF"          , "|t30:30:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t Отменить автоперенос")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_BURN_ON"           , "|t30:30:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t |cff0000Уничтожать|r всегда")
+ZO_CreateStringId("SI_LOOTSANITIZER_LCMACTION_BURN_OFF"          , "|t30:30:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t Отменить автоуничтожение")
+
 ZO_CreateStringId("SI_LOOTSANITIZER_WARNING"                     , "|cff0000Внимание!|r |cc5c29eУдалённые предметы нельзя вернуть.|r")
 
 ZO_CreateStringId("SI_LOOTSANITIZER_ITEM_CONTROL"                , "Режим удаления предметов")

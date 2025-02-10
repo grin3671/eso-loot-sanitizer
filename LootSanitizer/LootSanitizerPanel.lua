@@ -80,9 +80,10 @@ function LootSanitizer:addSettingsMenu ()
       choices = {
         GetString(SI_LOOTSANITIZER_SETS_CONTROL_NO),
         GetString(SI_LOOTSANITIZER_SETS_CONTROL_GREEN),
-        GetString(SI_LOOTSANITIZER_SETS_CONTROL_BLUE)
+        GetString(SI_LOOTSANITIZER_SETS_CONTROL_BLUE),
+        GetString(SI_LOOTSANITIZER_SETS_CONTROL_PURPLE)
       },
-      choicesValues = {0, 2, 3},
+      choicesValues = {0, 2, 3, 4},
       default = LootSanitizer.defaults.autoBindQuality,
       getFunc = function() return LootSanitizer.settings.autoBindQuality end,
       setFunc = function(value) LootSanitizer.settings.autoBindQuality = value end,
