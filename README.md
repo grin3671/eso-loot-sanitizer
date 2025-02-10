@@ -1,23 +1,26 @@
-###TODO
-```
-"Equipment", -- SI_ARMORY_EQUIPMENT_LABEL
-"Ingredient", -- SI_ITEMTYPE10
-"Style Material", -- SI_ITEMTYPE44
-"Style Motifs", -- SI_ITEMTYPEDISPLAYCATEGORY24
-"Style Materials", -- SI_ITEMTYPEDISPLAYCATEGORY17
-"Raw Trait", -- SI_ITEMTYPE68
-"Raw Trait", -- SI_SPECIALIZEDITEMTYPE3050
-"Trait", -- SI_TRADINGHOUSEFEATURECATEGORY3
-"Traits", -- SI_CRAFTING_COMPONENT_TOOLTIP_TRAITS
-"Trait Material", -- SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_TRAIT_MATERIAL
-"Trait Items", -- SI_ITEMTYPEDISPLAYCATEGORY18
-"Trait Items", -- SI_ITEMFILTERTYPE20
-"Trait Item", -- SI_GAMEPADITEMCATEGORY30
-"Armor Trait", -- SI_ITEMTYPE45
-"Weapon Trait", -- SI_ITEMTYPE46
-"Nirnhoned", -- SI_ITEMTRAITTYPE25
-"Nirnhoned", -- SI_ITEMTRAITTYPE26
-"Lure", -- SI_ITEMTYPE16
-"Lure", -- SI_SPECIALIZEDITEMTYPE750
-"Bait", -- SI_ITEMTYPEDISPLAYCATEGORY35
-```
+## Description
+Auto junk, destroy and bind items with this addon. Remove annoying items and enjoy more free space in your bag!
+
+This addon can be useful for non-ESO+ players, those who don't have guild trader, or any one who has bag space issues.
+
+> **Disclaimer**
+> This addon is still under development and may contain some issues. If it doesn't work as intended, please open an issue and describe the problem you are experiencing.
+
+### Features
+- Well-prepared lists of all kinds of items to faster setting your experience
+- Simply checkbox list without any overwhelming settings
+- Personal list (account-wide settings) to junk or destroy specific items
+- While ESO+ your crafting materials will not be affected by any settings
+
+### Dependencies
+- [LibAddonMenu 2.0](https://www.esoui.com/downloads/info7-LibAddonMenu.html) — for the addon settings menu
+
+### Optional Dependencies
+- [LibCustomMenu](https://www.esoui.com/downloads/info1146-LibCustomMenu.html) — for the right-click context menu used for personal lists
+- [ESO Master Recipe List](https://www.esoui.com/downloads/info1043-ESOMasterRecipeList.html) — to prevent destruction of tracked items from addon lists
+
+### Translations
+- EN
+- RU
+
+> Feel free to add or update localization files via pull requests.
