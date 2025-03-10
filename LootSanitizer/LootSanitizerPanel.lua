@@ -1,48 +1,82 @@
-local LootSanitizer = LootSanitizer
-local LAM = LibAddonMenu2
-
-function LootSanitizer:addSettingsMenu ()
+function LootSanitizer:AddSettingsMenu (defaults)
   local panelName = "LootSanitizerSettings"
 
-  -- Заголовок
-  LootSanitizer.settingsPanel = LAM:RegisterAddonPanel(panelName, {
+  -- MAIN HEADER
+  self.settingsPanel = LibAddonMenu2:RegisterAddonPanel(panelName, {
     type = "panel",
-    name = LootSanitizer.name,
-    version = LootSanitizer.version,
-    author = LootSanitizer.author,
+    name = self.name,
+    version = self.version,
+    author = self.author,
     slashCommand = "/lss",
   })
+
+  -- itemLinks are provided for examples in descriptions
+  -- gray trash
+  local FINGERLESS_GAUNTLETS = "|H1:item:64057:1:1:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:10000:0|h|h"
+  local SPOILED_FOOD = "|H0:item:57660:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+  -- craft
+  local RUNE_HAKEIJO = "|H0:item:68342:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+  local RUNE_INDEKO = "|H0:item:166045:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+  local RUNE_RAKEIPA = "|H0:item:45838:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+  local RUNE_OKO = "|H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+  local RUNE_MAKKO = "|H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+  local RUNE_DENI = "|H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+
+  -- gold icon
+  local goldIcon = zo_iconFormat(ZO_CURRENCIES_DATA[CURT_MONEY].gamepadTexture, ZO_CURRENCIES_DATA[CURT_MONEY].gamepadPercentOfLineSize, ZO_CURRENCIES_DATA[CURT_MONEY].gamepadPercentOfLineSize)
+
+  -- colorized text
+  local function ColorText(hex, text)
+    return "|c" .. hex .. text .. "|r"
+  end
+
+  -- insert gold icon
+  local function FormattedPrice(text)
+    return zo_strformat("|r<<1>> <<2>>|cc5c29e", ColorText("ffffff", tostring(text)), goldIcon)
+  end
+
+  local RemoveList = {}
+  local RemoveListControl = nil
+  RemoveList.Setup = function(list)
+    d(list)
+  end
+  local function InitializeList(control, ...)
+    RemoveList.control = WINDOW_MANAGER:CreateControl("RemoveListControl", control, CT_CONTROL)
+    RemoveList.control:SetAnchorFill()
+    RemoveList.backdrop = WINDOW_MANAGER:CreateControlFromVirtual("RemoveListControlBg", RemoveList.control, "ZO_DefaultBackdrop")
+    RemoveList.backdrop:SetAnchorFill()
+  end
 
   local optionsData = {
     {
       type = "description",
-      text = GetString(SI_LOOTSANITIZER_WARNING),
+      text = GetString(LOOTSANITIZER_WARNING),
     },
     {
       type = "dropdown",
-      name = GetString(SI_LOOTSANITIZER_ITEM_CONTROL),
+      name = GetString(LOOTSANITIZER_ITEM_CONTROL),
       choices = {
-        GetString(SI_LOOTSANITIZER_ITEM_CONTROL_NO),
-        GetString(SI_LOOTSANITIZER_ITEM_CONTROL_AUTOLOOT),
-        GetString(SI_LOOTSANITIZER_ITEM_CONTROL_ALWAYS)
+        GetString(LOOTSANITIZER_ITEM_CONTROL_NO),
+        GetString(LOOTSANITIZER_ITEM_CONTROL_AUTOLOOT),
+        GetString(LOOTSANITIZER_ITEM_CONTROL_ALWAYS)
       },
       choicesValues = {0, 1, 2},
-      default = LootSanitizer.defaults.workMode,
-      getFunc = function() return LootSanitizer.settings.workMode end,
-      setFunc = function(value) LootSanitizer.settings.workMode = value end,
+      default = defaults.workMode,
+      getFunc = function() return self.settings.workMode end,
+      setFunc = function(value) self.settings.workMode = value end,
     },
     {
       type = "dropdown",
-      name = GetString(SI_LOOTSANITIZER_CHAT_NOTIFY),
+      name = GetString(LOOTSANITIZER_CHAT_NOTIFY),
       choices = {
-        GetString(SI_LOOTSANITIZER_CHAT_NOTIFY_NO),
-        GetString(SI_LOOTSANITIZER_CHAT_NOTIFY_DELETE),
-        GetString(SI_LOOTSANITIZER_CHAT_NOTIFY_DEV)
+        GetString(LOOTSANITIZER_CHAT_NOTIFY_NO),
+        GetString(LOOTSANITIZER_CHAT_NOTIFY_DELETE),
+        GetString(LOOTSANITIZER_CHAT_NOTIFY_DEV)
       },
       choicesValues = {0, 1, 2},
-      default = LootSanitizer.defaults.chatMode,
-      getFunc = function() return LootSanitizer.settings.chatMode end,
-      setFunc = function(value) LootSanitizer.settings.chatMode = value end,
+      default = defaults.chatMode,
+      getFunc = function() return self.settings.chatMode end,
+      setFunc = function(value) self.settings.chatMode = value end,
     },
     {
       type = "description",
@@ -51,18 +85,30 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_armor_up.dds|t " .. GetString(SI_LOOTSANITIZER_EQUIPMENT_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_armor_up.dds|t " .. GetString(LOOTSANITIZER_EQUIPMENT_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_EQUIPMENT_CONTROL),
-      default = LootSanitizer.defaults.burnEquipment,
-      getFunc = function() return LootSanitizer.settings.burnEquipment end,
-      setFunc = function(value) LootSanitizer.settings.burnEquipment = value end,
+      name = GetString(LOOTSANITIZER_EQUIPMENT_CONTROL),
+      default = defaults.burnEquipment,
+      getFunc = function() return self.settings.burnEquipment end,
+      setFunc = function(value) self.settings.burnEquipment = value end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_EQUIPMENT_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. zo_strformat(GetString(LOOTSANITIZER_EQUIPMENT_DESCRIPTION), FormattedPrice("1")) .. "|r\n",
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_SIMPLECLOTHES_CONTROL),
+      default = defaults.burnEquipment,
+      getFunc = function() return self.settings.burnSimpleClothes end,
+      setFunc = function(value) self.settings.burnSimpleClothes = value end,
+    },
+    {
+      type = "description",
+      text = ColorText("c5c29e", zo_strformat(GetString(LOOTSANITIZER_SIMPLECLOTHES_DESCRIPTION), FormattedPrice("10"), FINGERLESS_GAUNTLETS)),
+      enableLinks = true,
     },
     {
       type = "description",
@@ -72,25 +118,25 @@ function LootSanitizer:addSettingsMenu ()
     -- SETS ITEMS
     {
       type = "header",
-      name = "|t36:36:EsoUI/Art/Collections/collections_tabIcon_itemSets_up.dds|t " .. GetString(SI_LOOTSANITIZER_SETS_HEADER),
+      name = "|t36:36:EsoUI/Art/Collections/collections_tabIcon_itemSets_up.dds|t " .. GetString(LOOTSANITIZER_SETS_HEADER),
     },
     {
       type = "dropdown",
-      name = GetString(SI_LOOTSANITIZER_SETS_CONTROL),
+      name = GetString(LOOTSANITIZER_SETS_CONTROL),
       choices = {
-        GetString(SI_LOOTSANITIZER_SETS_CONTROL_NO),
-        GetString(SI_LOOTSANITIZER_SETS_CONTROL_GREEN),
-        GetString(SI_LOOTSANITIZER_SETS_CONTROL_BLUE),
-        GetString(SI_LOOTSANITIZER_SETS_CONTROL_PURPLE)
+        GetString(LOOTSANITIZER_SETS_CONTROL_NO),
+        GetString(LOOTSANITIZER_SETS_CONTROL_GREEN),
+        GetString(LOOTSANITIZER_SETS_CONTROL_BLUE),
+        GetString(LOOTSANITIZER_SETS_CONTROL_PURPLE)
       },
       choicesValues = {0, 2, 3, 4},
-      default = LootSanitizer.defaults.autoBindQuality,
-      getFunc = function() return LootSanitizer.settings.autoBindQuality end,
-      setFunc = function(value) LootSanitizer.settings.autoBindQuality = value end,
+      default = defaults.autoBindQuality,
+      getFunc = function() return self.settings.autoBindQuality end,
+      setFunc = function(value) self.settings.autoBindQuality = value end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_SETS_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_SETS_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -100,21 +146,21 @@ function LootSanitizer:addSettingsMenu ()
     -- COMPANION ITEMS
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_companion_up.dds:inheritcolor|t " .. GetString(SI_LOOTSANITIZER_COMPANION_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_companion_up.dds:inheritcolor|t " .. GetString(LOOTSANITIZER_COMPANION_HEADER),
     },
     {
       type = "dropdown",
-      name = GetString(SI_LOOTSANITIZER_COMPANION_CONTROL),
+      name = GetString(LOOTSANITIZER_COMPANION_CONTROL),
       choices = {
-        GetString(SI_LOOTSANITIZER_COMPANION_CONTROL_NO),
-        GetString(SI_LOOTSANITIZER_COMPANION_CONTROL_WHITE),
-        GetString(SI_LOOTSANITIZER_COMPANION_CONTROL_GREEN),
-        GetString(SI_LOOTSANITIZER_COMPANION_CONTROL_BLUE)
+        GetString(LOOTSANITIZER_COMPANION_CONTROL_NO),
+        GetString(LOOTSANITIZER_COMPANION_CONTROL_WHITE),
+        GetString(LOOTSANITIZER_COMPANION_CONTROL_GREEN),
+        GetString(LOOTSANITIZER_COMPANION_CONTROL_BLUE)
       },
       choicesValues = {0, 1, 2, 3},
-      default = LootSanitizer.defaults.burnCompanionItems,
-      getFunc = function() return LootSanitizer.settings.burnCompanionItems end,
-      setFunc = function(value) LootSanitizer.settings.burnCompanionItems = value end,
+      default = defaults.burnCompanionItems,
+      getFunc = function() return self.settings.burnCompanionItems end,
+      setFunc = function(value) self.settings.burnCompanionItems = value end,
     },
     {
       type = "description",
@@ -123,45 +169,45 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_styleMaterial_up.dds:inheritcolor|t " .. GetString(SI_LOOTSANITIZER_MATERIALMOTIF_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_styleMaterial_up.dds:inheritcolor|t " .. GetString(LOOTSANITIZER_MATERIALMOTIF_HEADER),
     },
     {
       type = "dropdown",
-      name = GetString(SI_LOOTSANITIZER_MATERIAL_CONTROL),
+      name = GetString(LOOTSANITIZER_MATERIAL_CONTROL),
       choices = {
-        GetString(SI_LOOTSANITIZER_MATERIAL_CONTROL_NO),
-        GetString(SI_LOOTSANITIZER_MATERIAL_CONTROL_COMMON),
-        GetString(SI_LOOTSANITIZER_MATERIAL_CONTROL_RARE)
+        GetString(LOOTSANITIZER_MATERIAL_CONTROL_NO),
+        GetString(LOOTSANITIZER_MATERIAL_CONTROL_COMMON),
+        GetString(LOOTSANITIZER_MATERIAL_CONTROL_RARE)
       },
       choicesValues = {0, 1, 2},
-      default = LootSanitizer.defaults.burnRaceMaterial,
-      getFunc = function() return LootSanitizer.settings.burnRaceMaterial end,
-      setFunc = function(value) LootSanitizer.settings.burnRaceMaterial = value end,
+      default = defaults.burnRaceMaterial,
+      getFunc = function() return self.settings.burnRaceMaterial end,
+      setFunc = function(value) self.settings.burnRaceMaterial = value end,
     },
     {
       type = "dropdown",
-      name = GetString(SI_LOOTSANITIZER_MOTIF_CONTROL),
+      name = GetString(LOOTSANITIZER_MOTIF_CONTROL),
       choices = {
-        GetString(SI_LOOTSANITIZER_MOTIF_CONTROL_NO),
-        GetString(SI_LOOTSANITIZER_MOTIF_CONTROL_COMMON),
-        GetString(SI_LOOTSANITIZER_MOTIF_CONTROL_RARE)
+        GetString(LOOTSANITIZER_MOTIF_CONTROL_NO),
+        GetString(LOOTSANITIZER_MOTIF_CONTROL_COMMON),
+        GetString(LOOTSANITIZER_MOTIF_CONTROL_RARE)
       },
       choicesValues = {0, 1, 2},
-      default = LootSanitizer.defaults.burnRaceMotif,
-      getFunc = function() return LootSanitizer.settings.burnRaceMotif end,
-      setFunc = function(value) LootSanitizer.settings.burnRaceMotif = value end,
+      default = defaults.burnRaceMotif,
+      getFunc = function() return self.settings.burnRaceMotif end,
+      setFunc = function(value) self.settings.burnRaceMotif = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_MOTIFLEARN_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_MOTIFLEARN_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.autoLearnRaceMotif,
-      getFunc = function() return LootSanitizer.settings.autoLearnRaceMotif end,
-      setFunc = function(value) LootSanitizer.settings.autoLearnRaceMotif = value end,
+      name = GetString(LOOTSANITIZER_MOTIFLEARN_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_MOTIFLEARN_CONTROL_TOOLTIP),
+      default = defaults.autoLearnRaceMotif,
+      getFunc = function() return self.settings.autoLearnRaceMotif end,
+      setFunc = function(value) self.settings.autoLearnRaceMotif = value end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_MATERIALMOTIF_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_MATERIALMOTIF_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -170,19 +216,19 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_itemTrait_up.dds|t " .. GetString(SI_LOOTSANITIZER_TRAIT_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_itemTrait_up.dds|t " .. GetString(LOOTSANITIZER_TRAIT_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_TRAIT_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_TRAIT_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.burnTraitMaterial,
-      getFunc = function() return LootSanitizer.settings.burnTraitMaterial end,
-      setFunc = function(value) LootSanitizer.settings.burnTraitMaterial = value end,
+      name = GetString(LOOTSANITIZER_TRAIT_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_TRAIT_CONTROL_TOOLTIP),
+      default = defaults.burnTraitMaterial,
+      getFunc = function() return self.settings.burnTraitMaterial end,
+      setFunc = function(value) self.settings.burnTraitMaterial = value end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_TRAIT_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_TRAIT_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -191,19 +237,19 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_provisioning_up.dds|t " .. GetString(SI_LOOTSANITIZER_INGREDIENT_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_provisioning_up.dds|t " .. GetString(LOOTSANITIZER_INGREDIENT_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_INGREDIENT_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_INGREDIENT_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.burnIngredient,
-      getFunc = function() return LootSanitizer.settings.burnIngredient end,
-      setFunc = function(value) LootSanitizer.settings.burnIngredient = value end,
+      name = GetString(LOOTSANITIZER_INGREDIENT_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_INGREDIENT_CONTROL_TOOLTIP),
+      default = defaults.burnIngredient,
+      getFunc = function() return self.settings.burnIngredient end,
+      setFunc = function(value) self.settings.burnIngredient = value end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_INGREDIENT_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_INGREDIENT_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -212,29 +258,29 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_tool_up.dds|t " .. GetString(SI_LOOTSANITIZER_LOCKPICK_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_tool_up.dds|t " .. GetString(LOOTSANITIZER_LOCKPICK_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_LOCKPICK_CONTROL),
-      default = LootSanitizer.defaults.burnLockpick,
-      getFunc = function() return LootSanitizer.settings.burnLockpick end,
-      setFunc = function(value) LootSanitizer.settings.burnLockpick = value end,
+      name = GetString(LOOTSANITIZER_LOCKPICK_CONTROL),
+      default = defaults.burnLockpick,
+      getFunc = function() return self.settings.burnLockpick end,
+      setFunc = function(value) self.settings.burnLockpick = value end,
     },
     {
       type = "slider",
-      name = GetString(SI_LOOTSANITIZER_LOCKPICK_SLIDER),
-      tooltip = GetString(SI_LOOTSANITIZER_LOCKPICK_SLIDER_TOOLTIP),
+      name = GetString(LOOTSANITIZER_LOCKPICK_SLIDER),
+      tooltip = GetString(LOOTSANITIZER_LOCKPICK_SLIDER_TOOLTIP),
       min = 0,
       max = 20,
-      default = LootSanitizer.defaults.burnLockpickStackSaved,
-      getFunc = function() return LootSanitizer.settings.burnLockpickStackSaved end,
-      setFunc = function(value) LootSanitizer.settings.burnLockpickStackSaved = value end,
-      disabled = function() return LootSanitizer.settings.burnLockpick == false end,
+      default = defaults.burnLockpickStackSaved,
+      getFunc = function() return self.settings.burnLockpickStackSaved end,
+      setFunc = function(value) self.settings.burnLockpickStackSaved = value end,
+      disabled = function() return self.settings.burnLockpick == false end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_LOCKPICK_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_LOCKPICK_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -243,49 +289,29 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_bait_up.dds|t " .. GetString(SI_LOOTSANITIZER_BAIT_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_bait_up.dds|t " .. GetString(LOOTSANITIZER_BAIT_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_BAIT_CONTROL),
-      default = LootSanitizer.defaults.burnBait,
-      getFunc = function() return LootSanitizer.settings.burnBait end,
-      setFunc = function(value) LootSanitizer.settings.burnBait = value end,
+      name = GetString(LOOTSANITIZER_BAIT_CONTROL),
+      default = defaults.burnBait,
+      getFunc = function() return self.settings.burnBait end,
+      setFunc = function(value) self.settings.burnBait = value end,
     },
     {
       type = "slider",
-      name = GetString(SI_LOOTSANITIZER_BAIT_SLIDER),
-      tooltip = GetString(SI_LOOTSANITIZER_BAIT_SLIDER_TOOLTIP),
+      name = GetString(LOOTSANITIZER_BAIT_SLIDER),
+      tooltip = GetString(LOOTSANITIZER_BAIT_SLIDER_TOOLTIP),
       min = 0,
       max = 20,
-      default = LootSanitizer.defaults.burnBaitStackSaved,
-      getFunc = function() return LootSanitizer.settings.burnBaitStackSaved end,
-      setFunc = function(value) LootSanitizer.settings.burnBaitStackSaved = value end,
-      disabled = function() return LootSanitizer.settings.burnBait == false end,
+      default = defaults.burnBaitStackSaved,
+      getFunc = function() return self.settings.burnBaitStackSaved end,
+      setFunc = function(value) self.settings.burnBaitStackSaved = value end,
+      disabled = function() return self.settings.burnBait == false end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_BAIT_DESCRIPTION) .. "|r",
-    },
-    {
-      type = "description",
-      text = [[
-      ]],
-    },
-    {
-      type = "header",
-      name = "|t36:36:esoui/art/TradingHouse/Tradinghouse_Glyphs_Trio_up.dds|t " .. GetString(SI_LOOTSANITIZER_GLYPH_HEADER),
-    },
-    {
-      type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_GLYPH_CONTROL),
-      default = LootSanitizer.defaults.burnCommonGlyph,
-      getFunc = function() return LootSanitizer.settings.burnCommonGlyph end,
-      setFunc = function(value) LootSanitizer.settings.burnCommonGlyph = value end,
-    },
-    {
-      type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_GLYPH_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_BAIT_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -294,34 +320,18 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabicon_craftbag_enchanting_up.dds|t " .. GetString(SI_LOOTSANITIZER_RUNE_HEADER),
+      name = "|t36:36:esoui/art/TradingHouse/Tradinghouse_Glyphs_Trio_up.dds|t " .. GetString(LOOTSANITIZER_GLYPH_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_RUNE_POTENCY_CONTROL),
-      default = LootSanitizer.defaults.burnRunePotency,
-      getFunc = function() return LootSanitizer.settings.burnRunePotency end,
-      setFunc = function(value) LootSanitizer.settings.burnRunePotency = value end,
-    },
-    {
-      type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_RUNE_ESSENCE_CONTROL),
-      default = LootSanitizer.defaults.burnRuneEssence,
-      getFunc = function() return LootSanitizer.settings.burnRuneEssence end,
-      setFunc = function(value) LootSanitizer.settings.burnRuneEssence = value end,
-    },
-    {
-      type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_RUNE_DAILY_CONTROL),
-      default = LootSanitizer.defaults.saveRuneEssenceForDaily,
-      getFunc = function() return LootSanitizer.settings.saveRuneEssenceForDaily end,
-      setFunc = function(value) LootSanitizer.settings.saveRuneEssenceForDaily = value end,
-      disabled = function() return not LootSanitizer.settings.burnRuneEssence end,
+      name = GetString(LOOTSANITIZER_GLYPH_CONTROL),
+      default = defaults.burnCommonGlyph,
+      getFunc = function() return self.settings.burnCommonGlyph end,
+      setFunc = function(value) self.settings.burnCommonGlyph = value end,
     },
     {
       type = "description",
-      -- text = "|cc5c29eУдаляются все квадратные руны силы ниже 10 уровня. Треугольные руны сущности |H0:item:68342:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h, |H0:item:166045:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:45838:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h удаляться не будут. Для ежедневных ремесленных заданий будут сохраняться руны сущности |H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h, |H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h и |H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h.|r",
-      text = "|cc5c29e" .. zo_strformat(GetString(SI_LOOTSANITIZER_RUNE_DESCRIPTION), "|H0:item:68342:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", "|H0:item:166045:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", "|H0:item:45838:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", "|H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", "|H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", "|H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h") .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_GLYPH_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -330,19 +340,34 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t " .. GetString(SI_LOOTSANITIZER_TRASH_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabicon_craftbag_enchanting_up.dds|t " .. GetString(LOOTSANITIZER_RUNE_HEADER),
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_TRASH_CONTROL),
-      default = LootSanitizer.defaults.burnJunk,
-      getFunc = function() return LootSanitizer.settings.burnJunk end,
-      setFunc = function(value) LootSanitizer.settings.burnJunk = value end,
+      name = GetString(LOOTSANITIZER_RUNE_POTENCY_CONTROL),
+      default = defaults.burnRunePotency,
+      getFunc = function() return self.settings.burnRunePotency end,
+      setFunc = function(value) self.settings.burnRunePotency = value end,
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_RUNE_ESSENCE_CONTROL),
+      default = defaults.burnRuneEssence,
+      getFunc = function() return self.settings.burnRuneEssence end,
+      setFunc = function(value) self.settings.burnRuneEssence = value end,
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_RUNE_DAILY_CONTROL),
+      default = defaults.saveRuneEssenceForDaily,
+      getFunc = function() return self.settings.saveRuneEssenceForDaily end,
+      setFunc = function(value) self.settings.saveRuneEssenceForDaily = value end,
+      disabled = function() return not self.settings.burnRuneEssence end,
     },
     {
       type = "description",
-      -- text = "|cc5c29eУдаление предметов из категории «Мусор», которые стоят 1 золотую. К примеру, |H0:item:57660:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h.|r",
-      text = "|cc5c29e" .. zo_strformat(GetString(SI_LOOTSANITIZER_TRASH_DESCRIPTION), "|H0:item:57660:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h") .. "|r",
+      text = "|cc5c29e" .. zo_strformat(GetString(LOOTSANITIZER_RUNE_DESCRIPTION), RUNE_HAKEIJO, RUNE_INDEKO, RUNE_RAKEIPA, RUNE_OKO, RUNE_MAKKO, RUNE_DENI) .. "|r",
+      enableLinks = true,
     },
     {
       type = "description",
@@ -351,111 +376,132 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t " .. GetString(SI_LOOTSANITIZER_JUNK_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t " .. GetString(LOOTSANITIZER_TRASH_HEADER),
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_TRASH_CONTROL),
+      default = defaults.burnJunk,
+      getFunc = function() return self.settings.burnJunk end,
+      setFunc = function(value) self.settings.burnJunk = value end,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_JUNK_DESCRIPTION) .. "|r",
+      text = "|cc5c29e" .. zo_strformat(GetString(LOOTSANITIZER_TRASH_DESCRIPTION), SPOILED_FOOD) .. "|r",
+      enableLinks = true,
+    },
+    {
+      type = "description",
+      text = [[
+      ]],
+    },
+    {
+      type = "header",
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_junk_up.dds|t " .. GetString(LOOTSANITIZER_JUNK_HEADER),
+    },
+    {
+      type = "description",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_JUNK_DESCRIPTION) .. "|r",
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_COMMON_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_COMMON_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkNormalEquipment,
-      getFunc = function() return LootSanitizer.settings.junkNormalEquipment end,
-      setFunc = function(value) LootSanitizer.settings.junkNormalEquipment = value end,
+      name = GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_TOOLTIP),
+      default = defaults.junkNormalEquipment,
+      getFunc = function() return self.settings.junkNormalEquipment end,
+      setFunc = function(value) self.settings.junkNormalEquipment = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_ORNATE_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_ORNATE_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkOrnateEquipment,
-      getFunc = function() return LootSanitizer.settings.junkOrnateEquipment end,
-      setFunc = function(value) LootSanitizer.settings.junkOrnateEquipment = value end,
+      name = GetString(LOOTSANITIZER_JUNK_ORNATE_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_ORNATE_CONTROL_TOOLTIP),
+      default = defaults.junkOrnateEquipment,
+      getFunc = function() return self.settings.junkOrnateEquipment end,
+      setFunc = function(value) self.settings.junkOrnateEquipment = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_MIDDLE_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_MIDDLE_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkMiddleRawAndMaterial,
-      getFunc = function() return LootSanitizer.settings.junkMiddleRawAndMaterial end,
-      setFunc = function(value) LootSanitizer.settings.junkMiddleRawAndMaterial = value end,
+      name = GetString(LOOTSANITIZER_JUNK_MIDDLE_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_MIDDLE_CONTROL_TOOLTIP),
+      default = defaults.junkMiddleRawAndMaterial,
+      getFunc = function() return self.settings.junkMiddleRawAndMaterial end,
+      setFunc = function(value) self.settings.junkMiddleRawAndMaterial = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_NOCRPT_CONTROL),
-      default = LootSanitizer.defaults.junkNotCraftedPotion,
-      getFunc = function() return LootSanitizer.settings.junkNotCraftedPotion end,
-      setFunc = function(value) LootSanitizer.settings.junkNotCraftedPotion = value end,
+      name = GetString(LOOTSANITIZER_JUNK_NOCRPT_CONTROL),
+      default = defaults.junkNotCraftedPotion,
+      getFunc = function() return self.settings.junkNotCraftedPotion end,
+      setFunc = function(value) self.settings.junkNotCraftedPotion = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_NOCRPS_CONTROL),
-      default = LootSanitizer.defaults.junkNotCraftedPoison,
-      getFunc = function() return LootSanitizer.settings.junkNotCraftedPoison end,
-      setFunc = function(value) LootSanitizer.settings.junkNotCraftedPoison = value end,
+      name = GetString(LOOTSANITIZER_JUNK_NOCRPS_CONTROL),
+      default = defaults.junkNotCraftedPoison,
+      getFunc = function() return self.settings.junkNotCraftedPoison end,
+      setFunc = function(value) self.settings.junkNotCraftedPoison = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_NOCRFD_CONTROL),
-      default = LootSanitizer.defaults.junkNotCraftedFood,
-      getFunc = function() return LootSanitizer.settings.junkNotCraftedFood end,
-      setFunc = function(value) LootSanitizer.settings.junkNotCraftedFood = value end,
+      name = GetString(LOOTSANITIZER_JUNK_NOCRFD_CONTROL),
+      default = defaults.junkNotCraftedFood,
+      getFunc = function() return self.settings.junkNotCraftedFood end,
+      setFunc = function(value) self.settings.junkNotCraftedFood = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_NOCRDR_CONTROL),
-      default = LootSanitizer.defaults.junkNotCraftedDrink,
-      getFunc = function() return LootSanitizer.settings.junkNotCraftedDrink end,
-      setFunc = function(value) LootSanitizer.settings.junkNotCraftedDrink = value end,
+      name = GetString(LOOTSANITIZER_JUNK_NOCRDR_CONTROL),
+      default = defaults.junkNotCraftedDrink,
+      getFunc = function() return self.settings.junkNotCraftedDrink end,
+      setFunc = function(value) self.settings.junkNotCraftedDrink = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_SLVNPT_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_SLVNPT_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkPotionSolvent,
-      getFunc = function() return LootSanitizer.settings.junkPotionSolvent end,
-      setFunc = function(value) LootSanitizer.settings.junkPotionSolvent = value end,
+      name = GetString(LOOTSANITIZER_JUNK_SLVNPT_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_SLVNPT_CONTROL_TOOLTIP),
+      default = defaults.junkPotionSolvent,
+      getFunc = function() return self.settings.junkPotionSolvent end,
+      setFunc = function(value) self.settings.junkPotionSolvent = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_SLVNPS_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_SLVNPS_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkPoisonSolvent,
-      getFunc = function() return LootSanitizer.settings.junkPoisonSolvent end,
-      setFunc = function(value) LootSanitizer.settings.junkPoisonSolvent = value end,
+      name = GetString(LOOTSANITIZER_JUNK_SLVNPS_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_SLVNPS_CONTROL_TOOLTIP),
+      default = defaults.junkPoisonSolvent,
+      getFunc = function() return self.settings.junkPoisonSolvent end,
+      setFunc = function(value) self.settings.junkPoisonSolvent = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_TRASH_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_TRASH_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkTrashItem,
-      getFunc = function() return LootSanitizer.settings.junkTrashItem end,
-      setFunc = function(value) LootSanitizer.settings.junkTrashItem = value end,
+      name = GetString(LOOTSANITIZER_JUNK_TRASH_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_TRASH_CONTROL_TOOLTIP),
+      default = defaults.junkTrashItem,
+      getFunc = function() return self.settings.junkTrashItem end,
+      setFunc = function(value) self.settings.junkTrashItem = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_TROVE_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_TROVE_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkTreasureItem,
-      getFunc = function() return LootSanitizer.settings.junkTreasureItem end,
-      setFunc = function(value) LootSanitizer.settings.junkTreasureItem = value end,
+      name = GetString(LOOTSANITIZER_JUNK_TROVE_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_TROVE_CONTROL_TOOLTIP),
+      default = defaults.junkTreasureItem,
+      getFunc = function() return self.settings.junkTreasureItem end,
+      setFunc = function(value) self.settings.junkTreasureItem = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_RFISH_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_RFISH_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkRareFish,
-      getFunc = function() return LootSanitizer.settings.junkRareFish end,
-      setFunc = function(value) LootSanitizer.settings.junkRareFish = value end,
+      name = GetString(LOOTSANITIZER_JUNK_RFISH_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_RFISH_CONTROL_TOOLTIP),
+      default = defaults.junkRareFish,
+      getFunc = function() return self.settings.junkRareFish end,
+      setFunc = function(value) self.settings.junkRareFish = value end,
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_TROPHY_CONTROL),
-      tooltip = GetString(SI_LOOTSANITIZER_JUNK_TROPHY_CONTROL_TOOLTIP),
-      default = LootSanitizer.defaults.junkMonsterTrophy,
-      getFunc = function() return LootSanitizer.settings.junkMonsterTrophy end,
-      setFunc = function(value) LootSanitizer.settings.junkMonsterTrophy = value end,
+      name = GetString(LOOTSANITIZER_JUNK_TROPHY_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_TROPHY_CONTROL_TOOLTIP),
+      default = defaults.junkMonsterTrophy,
+      getFunc = function() return self.settings.junkMonsterTrophy end,
+      setFunc = function(value) self.settings.junkMonsterTrophy = value end,
     },
     {
       type = "description",
@@ -464,15 +510,15 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "checkbox",
-      name = GetString(SI_LOOTSANITIZER_JUNK_AUTOSELL_CONTROL),
-      default = LootSanitizer.defaults.autoJunkSell,
-      getFunc = function() return LootSanitizer.settings.autoJunkSell end,
-      setFunc = function(value) LootSanitizer.settings.autoJunkSell = value end,
+      name = GetString(LOOTSANITIZER_JUNK_AUTOSELL_CONTROL),
+      default = defaults.autoJunkSell,
+      getFunc = function() return self.settings.autoJunkSell end,
+      setFunc = function(value) self.settings.autoJunkSell = value end,
       disabled = true,
     },
     {
       type = "description",
-      text = GetString(SI_LOOTSANITIZER_JUNK_AUTOSELL_DESCRIPTION),
+      text = GetString(LOOTSANITIZER_JUNK_AUTOSELL_DESCRIPTION),
     },
     {
       type = "description",
@@ -481,23 +527,47 @@ function LootSanitizer:addSettingsMenu ()
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_quickslot_up.dds:inheritcolor|t " .. GetString(SI_LOOTSANITIZER_COMMAND_HEADER),
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t AUTO-BURNED ITEMS",
+    },
+    {
+      type = "custom",
+      reference = "LootSanitizerCustomPanelList",
+      createFunc = function(control)
+        -- call when panel created
+        d("[LootSanitizer]: Create Conrtol triggered!")
+        InitializeList(control)
+      end,
+      refreshFunc = function(control)
+        -- (optional) call when panel/controls refresh
+        d("[LootSanitizer]: Refresh Conrtol triggered!")
+      end,
+      minHeight = 50,
+      maxHeight = 300,
     },
     {
       type = "description",
-      text = "|cc5c29e" .. GetString(SI_LOOTSANITIZER_COMMAND_DESCRIPTION) .. "|r",
+      text = [[
+      ]],
+    },
+    {
+      type = "header",
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_quickslot_up.dds:inheritcolor|t " .. GetString(LOOTSANITIZER_COMMAND_HEADER),
     },
     {
       type = "description",
-      text = "/lss |cc5c29e— " .. GetString(SI_LOOTSANITIZER_COMMAND_SETTINGS) .. "|r",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_COMMAND_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
-      text = "/lootsanitizer |cc5c29e— " .. GetString(SI_LOOTSANITIZER_COMMAND_SETTINGS_ALT) .. "|r",
+      text = "/lss |cc5c29e— " .. GetString(LOOTSANITIZER_COMMAND_SETTINGS) .. "|r",
     },
     {
       type = "description",
-      text = "/lsstats |cc5c29e— " .. GetString(SI_LOOTSANITIZER_COMMAND_STATISTICS) .. "|r",
+      text = "/lootsanitizer |cc5c29e— " .. GetString(LOOTSANITIZER_COMMAND_SETTINGS_ALT) .. "|r",
+    },
+    {
+      type = "description",
+      text = "/lsstats |cc5c29e— " .. GetString(LOOTSANITIZER_COMMAND_STATISTICS) .. "|r",
     },
     {
       type = "description",
@@ -505,5 +575,5 @@ function LootSanitizer:addSettingsMenu ()
       ]],
     },
   }
-  LootSanitizer.controlsPanel = LAM:RegisterOptionControls(panelName, optionsData)
+  self.controlsPanel = LibAddonMenu2:RegisterOptionControls(panelName, optionsData)
 end

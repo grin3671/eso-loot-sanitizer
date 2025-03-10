@@ -1,15 +1,18 @@
--- First, we create a namespace for our addon by declaring a top-level table that will hold everything else.
 LootSanitizer = {}
 
--- This isn't strictly necessary, but we'll use this string later when registering events.
--- Better to define it in a single place rather than retyping the same string.
-LootSanitizer.name = "LootSanitizer"
-LootSanitizer.version = "0.17.0"
-LootSanitizer.author = "grin3671"
+local this = LootSanitizer
+this.name = "LootSanitizer"
+this.version = "0.18.0"
+this.author = "grin3671"
 
-LootSanitizer.enabled = 1
+this.enabled = 1
+this.stats =
+{
+  ["space"] = 0,
+  ["price"] = 0,
+}
 
-LootSanitizer.defaults =
+local DEFAULT_SETTINGS =
 {
   workMode = 0,
   chatMode = 1,
@@ -47,156 +50,126 @@ LootSanitizer.defaults =
   junkRareFish = false,
   junkMonsterTrophy = false,
   autoJunkSell = false,
-  -- LCM Values
+  burnSimpleClothes = false,
+  -- LibCustomMenu Values
   listOfJunk = {},
   listOfBurn = {}
 }
 
-LootSanitizer.trashRaceMaterial =
-{
-  33150, -- Кремень // Аргониан
-  33194, -- Кость // Босмер
-  33251, -- Молибден // Бретон
-  33252, -- Адамантит // Альтмер
-  33253, -- Обсидиан // Данмер
-  33255, -- Лунный камень // Каджит
-  33256, -- Корунд // Норд
-  33257, -- Марганец // Орк
-  33258, -- Звездный металл // Редгард
-}
-
-LootSanitizer.trashRaceRareMaterial =
-{
-  46149, -- Бронза // Варварский стиль
-  46150, -- Серебро // Первобытный стиль
-  46151, -- Сердце даэдра //Даэдрический стиль
-  46152, -- Палладий // Древнеэльфиский стиль
-  33254, -- Никель // Имперский стиль
-}
-
-LootSanitizer.trashTraitMaterial =
-{
-  23221, -- Альмадин // Удобство // 14
-  23204, -- Аметист // Сила стихий // 2
-  813,   -- Бирюза // Оберег // 5
-  23219, -- Бриллиант // Непробиваемость // 12
-  30219, -- Гелиотроп // Насыщенность // 16
-  23171, -- Гранат // Бодрость // 17
-  4442,  -- Изумруд // Развитие // 15
-  4456,  -- Кварц // Стойкость // 11
-  810,   -- Нефрит
-  23149, -- Огненный опал
-  4486,  -- Рубин
-  23173, -- Сапфир
-  30221, -- Сардоникс
-  23165, -- Сердолик
-  23203, -- Хризолит
-  16291, -- Цитрин
-}
-
-LootSanitizer.trashRaceMotif =
-{
-  16424, -- Ремесленный мотив 1: альтмеры
-  27245, -- Ремесленный мотив 2: данмеры
-  16428, -- Ремесленный мотив 3: босмеры
-  27244, -- Ремесленный мотив 4: норды
-  16425, -- Ремесленный мотив 5: бретонский стиль
-  16427, -- Ремесленный мотив 6: редгарды
-  44698, -- Ремесленный мотив 7: каджиты
-  16426, -- Ремесленный мотив 8: орки
-  27246, -- Ремесленный мотив 9: аргониане
-}
-
-LootSanitizer.trashRaceRareMotif =
-{
-  51638, --Ремесленный мотив 11: древнеэльфийский
-  51565, --Ремесленный мотив 12: варварский
-  51345, --Ремесленный мотив 13: первобытный
-  51688, --Ремесленный мотив 14: даэдрический
-}
-
-LootSanitizer.savedItems =
-{
-  68342,  -- Хакейджо
-  166045, -- Индеко
-  45838, -- Ракейпа
-}
-
-LootSanitizer.dailyRunes =
-{
-  45831,  -- Око
-  45832,  -- Мако
-  45833,  -- Дени
-}
-
--- TODO? EVENTS
-LootSanitizer.eventJester =
-{
-  114945, -- Веточка цветущей вишни
-  114946, -- Кольцевая шутиха
-  114947, -- Струйная шутиха
-  114948, -- Спиральная шутиха
-  147300, -- Веселый пирог
-  171322, -- Игристый сидр из яблок грязевых крабов
-  120891, -- [Rare] Шутиха «Искрящийся колпак»
-}
-
-LootSanitizer.stats =
-{
-  ["space"] = 0,
-  ["price"] = 0,
+local itemData = {
+  ["trashRaceMaterial"] = {
+    ["33150"]     = true, -- Flint (Argonian Style)
+    ["33194"]     = true, -- Bone (Wood Elf Style)
+    ["33251"]     = true, -- Molybdenum (Breton Style)
+    ["33252"]     = true, -- Adamantite (High Elf Style)
+    ["33253"]     = true, -- Obsidian (Dark Elf Style)
+    ["33255"]     = true, -- Moonstone (Khajiit Style)
+    ["33256"]     = true, -- Corundum (Nord Style)
+    ["33257"]     = true, -- Manganese (Orc Style)
+    ["33258"]     = true, -- Starmetal (Redguard Style)
+  },
+  ["trashRaceRareMaterial"] = {
+    ["33254"]     = true, -- Nickel (Imperial style)
+    ["46149"]     = true, -- Bronze (Barbaric Style)
+    ["46150"]     = true, -- Argentum (Primal Style)
+    ["46151"]     = true, -- Daedra Heart (Daedric Style)
+    ["46152"]     = true, -- Palladium (Ancient Elf Style)
+  },
+  ["trashTraitMaterial"] = {
+    ["810"]       = true, -- Jade / Weapon Trait / INFUSED
+    ["813"]       = true, -- Turquoise / Weapon Trait / DEFENDING
+    ["4486"]      = true, -- Ruby / Weapon Trait / PRECISE
+    ["16291"]     = true, -- Citrine / Weapon Trait / DECISIVE
+    ["23149"]     = true, -- Fire Opal / Weapon Trait / SHARPENED
+    ["23165"]     = true, -- Carnelian / Weapon Trait / TRAINING
+    ["23203"]     = true, -- Chysolite / Weapon Trait / POWERED
+    ["23204"]     = true, -- Amethyst / Weapon Trait / CHARGED
+    ["4442"]      = true, -- Emerald / Armor Trait / TRAINING
+    ["4456"]      = true, -- Quartz / Armor Trait / STURDY
+    ["23171"]     = true, -- Garnet / Armor Trait / INVIGORATING
+    ["23173"]     = true, -- Sapphire / Armor Trait / DIVINES
+    ["23219"]     = true, -- Diamond / Armor Trait / IMPENETRABLE
+    ["23221"]     = true, -- Almandine / Armor Trait / WELL FITTED
+    ["30219"]     = true, -- Bloodstone / Armor Trait / INFUSED
+    ["30221"]     = true, -- Sardonyx / Armor Trait / REINFORCED
+  },
+  ["trashRaceMotif"] = {
+    ["16424"]     = true, -- Crafting Motif 1: High Elf Style
+    ["27245"]     = true, -- Crafting Motif 2: Dark Elf Style
+    ["16428"]     = true, -- Crafting Motif 3: Wood Elf Style
+    ["27244"]     = true, -- Crafting Motif 4: Nord Style
+    ["16425"]     = true, -- Crafting Motif 5: Breton Style
+    ["16427"]     = true, -- Crafting Motif 6: Redguard Style
+    ["44698"]     = true, -- Crafting Motif 7: Khajiit Style
+    ["16426"]     = true, -- Crafting Motif 8: Orc Style
+    ["27246"]     = true, -- Crafting Motif 9: Argonian Style
+  },
+  ["trashRaceRareMotif"] = {
+    ["51638"]     = true, -- Crafting Motif 11: Ancient Elf Style
+    ["51565"]     = true, -- Crafting Motif 12: Barbaric Style
+    ["51345"]     = true, -- Crafting Motif 13: Primal Style
+    ["51688"]     = true, -- Crafting Motif 14: Daedric Style
+  },
+  ["trashEventItems"] = { -- not selling, for burn only // TODO: is it needed?
+    ["jesterToys"] = {
+      ["114945"]  = true, -- Cherry Blossom Twig
+      ["114946"]  = true, -- Sparkwreath Dazzler
+      ["114947"]  = true, -- Plume Dazzler
+      ["114948"]  = true, -- Spiral Dazzler
+      ["147300"]  = true, -- Revelry Pie
+      ["120891"]  = true, -- Sparkly Hat Dazzler
+    },
+    ["jesterFood"] = {
+      ["171322"]  = true, -- Sparkling Mudcrab Apple Cider
+    },
+  },
+  ["trade"] = {
+    ["3"] = { -- TradeskillType // CRAFTING_TYPE_ENCHANTING -- 3
+      ["10"] = { -- Trade Skill Level // TODO: improve individual characters settings
+        ["45831"] = true, -- Oko
+        ["45832"] = true, -- Makko
+        ["45833"] = true, -- Deni
+      },
+    },
+  },
+  ["whitelist"] = { -- this items will not affected by addon
+    ["45838"]     = true, -- Rakeipa
+    ["68342"]     = true, -- Hakeijo
+    ["166045"]    = true, -- Indeko
+  },
 }
 
 
-local LAM = LibAddonMenu2
-local LCM = LibCustomMenu
+EVENT_MANAGER:RegisterForEvent(this.name, EVENT_ADD_ON_LOADED, function(event, addonName)
+  if addonName ~= this.name then return end
+  EVENT_MANAGER:UnregisterForEvent(this.name, EVENT_ADD_ON_LOADED)
+  this:Initialize()
+end)
 
--- Next we create a function that will initialize our addon
-function LootSanitizer:Initialize()
-  -- self.inCombat = IsUnitInCombat("player")
-  self.autoLootEnabled = GetSetting(LOOT_SETTING_AUTO_LOOT)
-  d(LootSanitizer.name .. " initialized. " .. self.autoLootEnabled)
 
+function this:Initialize()
   -- Use SavedVars or Defaults as AddOn Settings
-  LootSanitizer.settings = ZO_SavedVars:NewAccountWide("LootSanitizerSavedVariables", 1, nil, LootSanitizer.defaults)
+  self.settings = ZO_SavedVars:NewAccountWide(self.name .. "SavedVariables", 1, nil, DEFAULT_SETTINGS)
 
-  if (LAM) then
-    LootSanitizer:addSettingsMenu()
+  if (LibAddonMenu2) then
+    self:AddSettingsMenu(DEFAULT_SETTINGS)
   end
-  
-  if (LCM) then
-    local function AddItem(inventorySlot, slotActions)
-      local valid = ZO_Inventory_GetBagAndIndex(inventorySlot)
-      if not valid then return end
 
-      local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
-      local itemLink = GetItemLink(bagId, slotIndex)
-
-      -- List of Junk
-      local isInAccountJunkList, listJunkIndex = self.HasValue(self.settings.listOfJunk, itemLink);
-      slotActions:AddCustomSlotAction(isInAccountJunkList and SI_LOOTSANITIZER_LCMACTION_JUNK_OFF or SI_LOOTSANITIZER_LCMACTION_JUNK_ON, function()
-        if isInAccountJunkList == false then
-          self:addToList(self.settings.listOfJunk, itemLink)
-          self:SetItemJunk(bagId, slotIndex)
-        else
-          self:removeFromList(self.settings.listOfJunk, listJunkIndex)
-        end
-      end , "")
-
-      -- List of Burn
-      local isInAccountBurnList, listBurnIndex = self.HasValue(self.settings.listOfBurn, itemLink);
-      slotActions:AddCustomSlotAction(isInAccountBurnList and SI_LOOTSANITIZER_LCMACTION_BURN_OFF or SI_LOOTSANITIZER_LCMACTION_BURN_ON, function()
-        if isInAccountBurnList == false then
-          self:addToList(self.settings.listOfBurn, itemLink)
-        else
-          self:removeFromList(self.settings.listOfBurn, listBurnIndex)
-        end
-      end , "")
-    end
-     
-    LCM:RegisterContextMenu(AddItem, LCM.CATEGORY_LATE)
+  if (LibCustomMenu) then
+    self:AddContextMenu()
   end
+
+  -- Do thing after getting new items in backpack
+  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, self.OnInventoryChanged)
+  EVENT_MANAGER:AddFilterForEvent(self.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
+  EVENT_MANAGER:AddFilterForEvent(self.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+  EVENT_MANAGER:AddFilterForEvent(self.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
+
+  -- Turn off/on addon on open/close vendors store to prevent destoing buyed items
+  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_OPEN_STORE, self.turnOff)
+  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_CLOSE_STORE, self.turnOn)
 end
+
 
 -- 
 function LootSanitizer:addToList(list, itemLink)
@@ -223,39 +196,6 @@ end
 
 
 
--- LootSanitizer.linkHandlers =
--- {
---   lslink = function (data) if data then d("linkTypeData: " .. data) end end
--- }
-
--- function LootSanitizer:OnLinkClicked( rawLink, mouseButton, linkText, linkStyle, linkType, ... )
---   if (type(linkType) == "string" and LootSanitizer.linkHandlers[linkType]) then
---     LootSanitizer.linkHandlers[linkType](...)
---     return true -- link has been handled
---   end
--- end
-
--- function LootSanitizer:registerChatLinks()
---   -- register link type
---   LibChatMessage:RegisterCustomChatLink("lslink")
---   -- set handlers
---   LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, self.OnLinkClicked, self)
---   LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
--- end
-
-
-
-
--- Then we create an event handler function which will be called when the "addon loaded" event
--- occurs. We'll use this to initialize our addon after all of its resources are fully loaded.
-function LootSanitizer.OnAddOnLoaded(event, addonName)
-  -- The event fires each time *any* addon loads - but we only care about when our own addon loads.
-  if addonName == LootSanitizer.name then
-    LootSanitizer:Initialize()
-  end
-end
-
-
 function LootSanitizer:IsItemShouldBeDestroed(bagIndex, slotIndex, stackCountChange)
   local itemLink = GetItemLink(bagIndex, slotIndex)
 
@@ -273,88 +213,31 @@ function LootSanitizer:IsItemShouldBeDestroed(bagIndex, slotIndex, stackCountCha
     return true, "R100"
   end
 
-  -- Get additional info
+  -- Get basic info
   local itemId = GetItemLinkItemId(itemLink)
-  local itemIcon, itemQuantity, itemPrice, meetsUsageRequirement, locked, itemEquipType, itemStyle, quality, displayQuality = GetItemInfo(bagIndex, slotIndex)
-  local itemTrait = GetItemTrait(bagIndex, slotIndex)
-  local itemType, itemSpecialType = GetItemType(bagIndex, slotIndex)
-  local itemTrade, _, _, itemEx2, _ = GetItemCraftingInfo(bagIndex, slotIndex)
-  local itemReqSkillRank = GetItemLinkRequiredCraftingSkillRank(itemLink)
-  local itemRarity = displayQuality or quality
+  local strItemId = tostring(itemId)
 
-  -- Get additional info
-  local isNewMotif = false
-  if IsItemLinkBookPartOfCollection(itemLink) then
-    if not IsItemLinkBookKnown(itemLink) then
-      isNewMotif = true
-    end
-  end
-
-  local isCompanionItem = false
-  if GetItemLinkActorCategory(itemLink) == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
-    isCompanionItem = true
-  end
-
-  local isPlayerEquip = false
-  if isCompanionItem == false and ((itemEquipType == EQUIP_TYPE_RING or itemEquipType == EQUIP_TYPE_NECK) or (itemSpecialType == SPECIALIZED_ITEMTYPE_WEAPON or itemSpecialType == SPECIALIZED_ITEMTYPE_ARMOR)) then
-    isPlayerEquip = true
-  end
-
-  -- Calculate reason
-  if self.settings.burnEquipment and isPlayerEquip and itemPrice == 1 and quality == 1 and itemTrait == 0 then
-    return true, "R101"
-  end
-
-  if self.settings.burnCompanionItems >= 1 and isCompanionItem and itemRarity <= self.settings.burnCompanionItems then
-    return true, "R102"
-  end
-
-  -- Удаление материалов стилей
-  if self.settings.burnRaceMaterial >= 1 and self.HasValue(self.trashRaceMaterial, itemId) then
+  -- SIMPLE RULES
+  if self.settings.burnRaceMaterial >= 1 and itemData["trashRaceMaterial"][strItemId] then
     return true, "R103"
   end
 
-  if self.settings.burnRaceMaterial == 2 and self.HasValue(self.trashRaceRareMaterial, itemId) then
+  if self.settings.burnRaceMaterial == 2 and itemData["trashRaceRareMaterial"][strItemId] then
     return true, "R104"
   end
 
-  if self.settings.burnTraitMaterial and self.HasValue(self.trashTraitMaterial, itemId) then
+  if self.settings.burnTraitMaterial and itemData["trashTraitMaterial"][strItemId] then
     return true, "R105"
   end
 
-  if self.settings.burnIngredient and itemTrade == 5 and quality == 1 and itemPrice == 1 then
-    return true, "R106"
-  end
-
-  -- Удаление лишних отмычек
-  if self.settings.burnLockpick and itemId == 30357 and itemQuantity == 1 and GetItemLinkStacks(itemLink) >= 200 * self.settings.burnLockpickStackSaved then
-    return true, "R107"
-  end
-
-  if self.settings.burnBait and itemType == 16 and itemSpecialType == 750 and GetItemLinkStacks(itemLink) >= 200 * self.settings.burnBaitStackSaved then
-    return true, "R108"
-  end
-
-  if self.settings.burnCommonGlyph and (itemType == 20 or itemType == 21 or itemType == 26) and stackCountChange == 1 and IsItemLinkCrafted(itemLink) == false and quality == 1 then
-    return true, "R109"
-  end
-
-  if self.settings.burnRunePotency and itemType == 51 and stackCountChange <= self.settings.maxBurnedStack and itemEx2 ~= 10 then
-    return true, "R110"
-  end
-
-  if self.settings.burnRuneEssence and itemType == 53 and stackCountChange <= self.settings.maxBurnedStack and self.HasValue(self.savedItems, itemId) == false then
-    if self.settings.saveRuneEssenceForDaily and self.HasValue(self.dailyRunes, itemId) then
-      return false, "R111"
+  if (self.settings.burnRaceMotif >= 1 and itemData["trashRaceMotif"][strItemId]) or (self.settings.burnRaceMotif == 2 and itemData["trashRaceRareMotif"][strItemId]) then
+    -- Get additional info
+    local isNewMotif = false
+    if IsItemLinkBookPartOfCollection(itemLink) then
+      if not IsItemLinkBookKnown(itemLink) then
+        isNewMotif = true
+      end
     end
-    return true, "R112"
-  end
-
-  if self.settings.burnJunk and itemSpecialType == SPECIALIZED_ITEMTYPE_TRASH and itemPrice == 1 then
-    return true, "R113"
-  end
-
-  if (self.settings.burnRaceMotif >= 1 and self.HasValue(self.trashRaceMotif, itemId)) or (self.settings.burnRaceMotif == 2 and self.HasValue(self.trashRaceRareMotif, itemId)) then
     if self.settings.autoLearnRaceMotif and isNewMotif then
       if CallSecureProtected("UseItem", bagIndex, slotIndex) then
         EVENT_MANAGER:RegisterForEvent(self.name, EVENT_SHOW_BOOK, self.CloseMotifBook)
@@ -363,6 +246,89 @@ function LootSanitizer:IsItemShouldBeDestroed(bagIndex, slotIndex, stackCountCha
       return true, "R114"
     end
   end
+
+
+  -- -- // TODO: add itemCache
+  -- -- If an Item's check reaches this point, it's better to consider adding it to the itemCache
+  -- -- Check if Item already in Cache and function can resolve faster
+  -- if itemCache[strItemId] then
+  --   local cacheAnswer = itemCache[strItemId]
+  --   -- NOTE: Items that are used more frequently will remain in the cache longer.
+  --   itemCache[strItemId]["usage"] = itemCache[strItemId]["usage"] + 1
+  --   return cacheAnswer.bool, cacheAnswer.reason
+  -- end
+
+
+  -- Get additional info
+  local itemIcon, itemQuantity, itemPrice, meetsUsageRequirement, locked, itemEquipType, itemStyle, quality, displayQuality = GetItemInfo(bagIndex, slotIndex)
+  local itemTrait = GetItemTrait(bagIndex, slotIndex)
+  local itemType, itemSpecialType = GetItemType(bagIndex, slotIndex)
+  local itemRarity = displayQuality or quality
+
+  -- RULES RELATED TO EQUIPMENT (include poisons!)
+  if itemEquipType ~= EQUIP_TYPE_INVALID then
+    local itemActorCategory = GetItemLinkActorCategory(itemLink)
+    local armorType = GetItemArmorType(bagIndex, slotIndex)
+
+    if self.settings.burnEquipment and itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER and itemPrice == 1 and itemRarity == 1 and itemTrait == 0 then
+      return true, "R101"
+    end
+
+    if self.settings.burnCompanionItems >= 1 and itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION and itemRarity <= self.settings.burnCompanionItems then
+      return true, "R102"
+    end
+
+    if self.settings.burnSimpleClothes and itemRarity == ITEM_DISPLAY_QUALITY_TRASH and itemType == ITEMTYPE_ARMOR and armorType == ARMORTYPE_NONE and (itemEquipType ~= EQUIP_TYPE_RING and itemEquipType ~= EQUIP_TYPE_NECK) then
+      return true, "R115"
+    end
+  end
+
+  -- RULES RELATED TO not EQUIPMENT (ixclude poisons!)
+  if itemEquipType == EQUIP_TYPE_INVALID then
+    -- Get additional info
+    local itemTrade, _, _, itemEx2, _ = GetItemCraftingInfo(bagIndex, slotIndex)
+    local itemReqSkillRank = GetItemLinkRequiredCraftingSkillRank(itemLink)
+
+
+    if self.settings.burnIngredient and itemTrade == 5 and itemRarity == 1 and itemPrice == 1 then
+      return true, "R106"
+    end
+
+    if self.settings.burnLockpick and itemId == 30357 and itemQuantity == 1 and GetItemLinkStacks(itemLink) >= 200 * self.settings.burnLockpickStackSaved then
+      return true, "R107"
+    end
+  
+    if self.settings.burnBait and itemType == 16 and itemSpecialType == 750 and GetItemLinkStacks(itemLink) >= 200 * self.settings.burnBaitStackSaved then
+      return true, "R108"
+    end
+
+    if self.settings.burnCommonGlyph and (itemType == 20 or itemType == 21 or itemType == 26) and stackCountChange == 1 and IsItemLinkCrafted(itemLink) == false and itemRarity == 1 then
+      return true, "R109"
+    end
+  
+    if self.settings.burnRunePotency and itemType == 51 and stackCountChange <= self.settings.maxBurnedStack and itemEx2 ~= 10 then
+      return true, "R110"
+    end
+  
+    if self.settings.burnRuneEssence and itemType == 53 and stackCountChange <= self.settings.maxBurnedStack and itemData["whitelist"][strItemId] == nil then
+      if self.settings.saveRuneEssenceForDaily and itemData["trade"]["3"]["10"][strItemId] then
+        return false, "R111"
+      end
+      return true, "R112"
+    end
+  
+    if self.settings.burnJunk and itemSpecialType == SPECIALIZED_ITEMTYPE_TRASH and itemPrice == 1 then
+      return true, "R113"
+    end
+  end
+
+  -- -- // TODO: add itemCache
+  -- -- If an Item's check reaches this point, it's definitely better to add it to the itemCache
+  -- itemCache[strItemId] = {
+  --   ["bool"] = false,
+  --   ["reason"] = "R0",
+  --   ["usage"] = 1
+  -- }
 
   return false, "R0"
 end
@@ -386,11 +352,12 @@ function LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex)
   end
 
   -- Get additional info
-  local itemIcon, itemQuantity, itemPrice, meetsUsageRequirement, locked, equipType, itemStyle, itemRarity, displayQuality = GetItemInfo(bagIndex, slotIndex)
+  local itemIcon, itemQuantity, itemPrice, meetsUsageRequirement, locked, equipType, itemStyle, itemQuality, displayQuality = GetItemInfo(bagIndex, slotIndex)
   local itemTrait = GetItemTrait(bagIndex, slotIndex)
   local itemType, itemSpecialType = GetItemType(bagIndex, slotIndex)
   local itemTrade, _, _, itemEx2, _ = GetItemCraftingInfo(bagIndex, slotIndex)
   local itemReqSkillRank = GetItemLinkRequiredCraftingSkillRank(itemLink)
+  local itemRarity = displayQuality or itemQuality
 
   -- Get Item users
   local isCompanionItem = GetItemActorCategory(bagIndex, slotIndex) == GAMEPLAY_ACTOR_CATEGORY_COMPANION
@@ -565,36 +532,13 @@ function LootSanitizer.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewI
     isItemTracked = true
   end
 
-  -- isStyleMaterialTracked
-  local isStyleMaterialTracked = false
-  local itemStyleMaterialLink = GetItemStyleMaterialLink(itemStyle)
-  if ESOMRL and ESOMRL.ISMRLTracking(itemStyleMaterialLink) then
-    isStyleMaterialTracked = true
-  end
-
-  -- isCompanionItem
-  local isCompanionItem = false
-  if GetItemLinkActorCategory(itemLink) == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
-    isCompanionItem = true
-  end
-
-  -- isPlayerEquip
-  local isPlayerEquip = false
-  if isCompanionItem == false and ((itemEquipType == EQUIP_TYPE_RING or itemEquipType == EQUIP_TYPE_NECK) or (itemSpecialType == SPECIALIZED_ITEMTYPE_WEAPON or itemSpecialType == SPECIALIZED_ITEMTYPE_ARMOR)) then
-    isPlayerEquip = true
-  end
-
-
 
   -- BURN
   local isJunk, junkReason = false, false
   local isBurn, burnReason = LootSanitizer:IsItemShouldBeDestroed(bagIndex, slotIndex, stackCountChange)
   if isBurn then
-    if not IsShiftKeyDown() and not isItemTracked and (not isPlayerEquip and not isStyleMaterialTracked) then
-      LootSanitizer:Message(itemLink)
-      LootSanitizer:DestroyItem(bagIndex, slotIndex)
-      LootSanitizer:UpdateStats(itemPrice * stackCountChange)
-    elseif burnReason == "R101" then
+    -- if not IsShiftKeyDown() and not isItemTracked and (not isPlayerEquip and not isStyleMaterialTracked) then
+    if not IsShiftKeyDown() and not isItemTracked then
       LootSanitizer:Message(itemLink)
       LootSanitizer:DestroyItem(bagIndex, slotIndex)
       LootSanitizer:UpdateStats(itemPrice * stackCountChange)
@@ -605,15 +549,13 @@ function LootSanitizer.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewI
   end
   if LootSanitizer.settings.chatMode == 2 and isBurn then
     if IsShiftKeyDown() then
-      d(zo_strformat("[<<1>>] Holding Shift prevents destroying of <<2>>.", GetString(SI_LOOTSANITIZER_NAME), itemName))
+      d(zo_strformat("[<<1>>] Holding Shift prevents destroying of <<2>>.", GetString(LOOTSANITIZER_NAME), itemName))
     elseif isItemTracked then
-      d(zo_strformat("[<<1>>] Item not burned coz <<2>> is tracked by addon MRL.", GetString(SI_LOOTSANITIZER_NAME), itemName))
-    elseif isPlayerEquip and isStyleMaterialTracked then
-      d(zo_strformat("[<<1>>] Item not burned coz style material of <<2>> is tracked by addon MRL.", GetString(SI_LOOTSANITIZER_NAME), itemName))
+      d(zo_strformat("[<<1>>] Item not burned coz <<2>> is tracked by addon MRL.", GetString(LOOTSANITIZER_NAME), itemName))
     end
   end
   if LootSanitizer.settings.chatMode == 2 and burnReason ~= "R0" then
-    d(zo_strformat("[<<1>>] Is <<2>> should be destored: <<3>>. Reason: <<4>>.", GetString(SI_LOOTSANITIZER_NAME), itemName, tostring(isBurn), burnReason))
+    d(zo_strformat("[<<1>>] Is <<2>> should be destored: <<3>>. Reason: <<4>>.", GetString(LOOTSANITIZER_NAME), itemName, tostring(isBurn), burnReason))
   end
 
 
@@ -623,7 +565,7 @@ function LootSanitizer.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewI
     LootSanitizer:SetItemJunk(bagIndex, slotIndex)
   end
   if LootSanitizer.settings.chatMode == 2 and junkReason ~= "R0" then
-    d(zo_strformat("[<<4>>] Is <<1>> junk: <<2>>. Reason: <<3>>.", itemName, tostring(isJunk), junkReason, GetString(SI_LOOTSANITIZER_NAME)))
+    d(zo_strformat("[<<4>>] Is <<1>> junk: <<2>>. Reason: <<3>>.", itemName, tostring(isJunk), junkReason, GetString(LOOTSANITIZER_NAME)))
   end
 
 end
@@ -688,14 +630,48 @@ end
 function LootSanitizer:Message (text, type)
   local SanitizerTexts =
   {
-    delete = "[" .. GetString(SI_LOOTSANITIZER_NAME) .. "] " .. GetString(SI_LOOTSANITIZER_ACTION),
-    bind   = "[" .. GetString(SI_LOOTSANITIZER_NAME) .. "] " .. GetString(SI_LOOTSANITIZER_BINDACTION),
+    delete = "[" .. GetString(LOOTSANITIZER_NAME) .. "] " .. GetString(LOOTSANITIZER_ACTION),
+    bind   = "[" .. GetString(LOOTSANITIZER_NAME) .. "] " .. GetString(LOOTSANITIZER_BINDACTION),
   }
   local textTypePrefix = "delete"
   if type then textTypePrefix = type end
   if LootSanitizer.settings.chatMode > 0 then
     CHAT_ROUTER:AddSystemMessage(string.format(SanitizerTexts[textTypePrefix] .. " " .. text .. "."))
   end
+end
+
+
+function this:AddContextMenu()
+  local function AddItem(inventorySlot, slotActions)
+    local valid = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    if not valid then return end
+
+    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    local itemLink = GetItemLink(bagId, slotIndex)
+
+    -- List of Junk
+    local isInAccountJunkList, listJunkIndex = self.HasValue(self.settings.listOfJunk, itemLink);
+    slotActions:AddCustomSlotAction(isInAccountJunkList and LOOTSANITIZER_LCMACTION_JUNK_OFF or LOOTSANITIZER_LCMACTION_JUNK_ON, function()
+      if isInAccountJunkList == false then
+        self:addToList(self.settings.listOfJunk, itemLink)
+        self:SetItemJunk(bagId, slotIndex)
+      else
+        self:removeFromList(self.settings.listOfJunk, listJunkIndex)
+      end
+    end , "")
+
+    -- List of Burn
+    local isInAccountBurnList, listBurnIndex = self.HasValue(self.settings.listOfBurn, itemLink);
+    slotActions:AddCustomSlotAction(isInAccountBurnList and LOOTSANITIZER_LCMACTION_BURN_OFF or LOOTSANITIZER_LCMACTION_BURN_ON, function()
+      if isInAccountBurnList == false then
+        self:addToList(self.settings.listOfBurn, itemLink)
+      else
+        self:removeFromList(self.settings.listOfBurn, listBurnIndex)
+      end
+    end , "")
+  end
+
+  LibCustomMenu:RegisterContextMenu(AddItem, LibCustomMenu.CATEGORY_LATE)
 end
 
 
@@ -716,9 +692,30 @@ function LootSanitizer:openSettingsWindow()
 end
 
 
-SLASH_COMMANDS["/lss"] = function()
-  LootSanitizer:openSettingsWindow()
+function LootSanitizer:test()
+  local itemId = 33150
+  d(tostring(itemData.trashRaceMaterial[tostring(itemId)]))
+  d(ZO_Currency_FormatGamepad(CURT_MONEY, 3, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
 end
+
+
+
+
+this.RegisterChatCommand = function(command, callback, description)
+  local LSC = LibSlashCommander
+  if not LSC then
+    SLASH_COMMANDS[command] = function(input) callback(input) end
+  else
+    LSC:Register(command, function(input) callback(input) end, description)
+  end
+end
+
+this.RegisterChatCommand("/lstest", LootSanitizer.test, "lstest")
+
+
+-- SLASH_COMMANDS["/lss"] = function()
+--   LootSanitizer:openSettingsWindow()
+-- end
 
 SLASH_COMMANDS["/lootsanitizer"] = function()
   LootSanitizer:openSettingsWindow()
@@ -733,18 +730,24 @@ SLASH_COMMANDS["/lslist"] = function(list)
 end
 
 
--- Register addon loading
-EVENT_MANAGER:RegisterForEvent(LootSanitizer.name, EVENT_ADD_ON_LOADED, LootSanitizer.OnAddOnLoaded)
 
--- This type of event does not allow to remove items, cos did not provide bagIndex and slotIndex
---EVENT_MANAGER:RegisterForEvent(LootSanitizer.name, EVENT_LOOT_RECEIVED, LootSanitizer.OnLootReceived)
 
--- Do thing after getting new items in backpack
-EVENT_MANAGER:RegisterForEvent(LootSanitizer.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, LootSanitizer.OnInventoryChanged)
-EVENT_MANAGER:AddFilterForEvent(LootSanitizer.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
-EVENT_MANAGER:AddFilterForEvent(LootSanitizer.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
-EVENT_MANAGER:AddFilterForEvent(LootSanitizer.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
+-- LootSanitizer.linkHandlers =
+-- {
+--   lslink = function (data) if data then d("linkTypeData: " .. data) end end
+-- }
 
--- Turn off/on addon on open/close vendors store to prevent destoing buyed items
-EVENT_MANAGER:RegisterForEvent(LootSanitizer.name, EVENT_OPEN_STORE, LootSanitizer.turnOff)
-EVENT_MANAGER:RegisterForEvent(LootSanitizer.name, EVENT_CLOSE_STORE, LootSanitizer.turnOn)
+-- function LootSanitizer:OnLinkClicked( rawLink, mouseButton, linkText, linkStyle, linkType, ... )
+--   if (type(linkType) == "string" and LootSanitizer.linkHandlers[linkType]) then
+--     LootSanitizer.linkHandlers[linkType](...)
+--     return true -- link has been handled
+--   end
+-- end
+
+-- function LootSanitizer:registerChatLinks()
+--   -- register link type
+--   LibChatMessage:RegisterCustomChatLink("lslink")
+--   -- set handlers
+--   LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, self.OnLinkClicked, self)
+--   LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
+-- end

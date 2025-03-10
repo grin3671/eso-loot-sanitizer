@@ -24,3 +24,8 @@ This addon can be useful for non-ESO+ players, those who don't have guild trader
 - RU
 
 > Feel free to add or update localization files via pull requests.
+
+## Install
+- Download this addon via GitHub ``Code`` > ``Download ZIP`` buttons
+- Unzip internal folder ``LootSanitizer`` to your addons folder
+> Default addons folder path ``C:/Users/%username%/Documents/Elder Scrolls Online/live/AddOns``
