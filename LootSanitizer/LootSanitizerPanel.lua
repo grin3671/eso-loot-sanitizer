@@ -11,6 +11,11 @@ function LootSanitizer:AddSettingsMenu (defaults)
   })
 
   -- itemLinks are provided for examples in descriptions
+  --item quality colorized names
+  local ITEM_Q1 = GetItemQualityColor(1):Colorize(GetString("SI_ITEMDISPLAYQUALITY", 1)) -- white
+  local ITEM_Q2 = GetItemQualityColor(2):Colorize(GetString("SI_ITEMDISPLAYQUALITY", 2)) -- green
+  local ITEM_Q3 = GetItemQualityColor(3):Colorize(GetString("SI_ITEMDISPLAYQUALITY", 3)) -- blue
+  local ITEM_Q4 = GetItemQualityColor(4):Colorize(GetString("SI_ITEMDISPLAYQUALITY", 4)) -- purple
   -- gray trash
   local FINGERLESS_GAUNTLETS = "|H1:item:64057:1:1:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:10000:0|h|h"
   local SPOILED_FOOD = "|H0:item:57660:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
@@ -21,20 +26,19 @@ function LootSanitizer:AddSettingsMenu (defaults)
   local RUNE_OKO = "|H0:item:45831:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
   local RUNE_MAKKO = "|H0:item:45832:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
   local RUNE_DENI = "|H0:item:45833:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
-
   -- gold icon
   local goldIcon = zo_iconFormat(ZO_CURRENCIES_DATA[CURT_MONEY].gamepadTexture, ZO_CURRENCIES_DATA[CURT_MONEY].gamepadPercentOfLineSize, ZO_CURRENCIES_DATA[CURT_MONEY].gamepadPercentOfLineSize)
-
   -- colorized text
   local function ColorText(hex, text)
     return "|c" .. hex .. text .. "|r"
   end
-
   -- insert gold icon
   local function FormattedPrice(text)
     return zo_strformat("|r<<1>> <<2>>|cc5c29e", ColorText("ffffff", tostring(text)), goldIcon)
   end
 
+
+  -- TODO: Auto Burned Items List
   local RemoveList = {}
   local RemoveListControl = nil
   RemoveList.Setup = function(list)
@@ -167,6 +171,7 @@ function LootSanitizer:AddSettingsMenu (defaults)
       text = [[
       ]],
     },
+    -- MATERIALS
     {
       type = "header",
       name = "|t36:36:esoui/art/inventory/inventory_tabIcon_Craftbag_styleMaterial_up.dds:inheritcolor|t " .. GetString(LOOTSANITIZER_MATERIALMOTIF_HEADER),
@@ -208,6 +213,10 @@ function LootSanitizer:AddSettingsMenu (defaults)
     {
       type = "description",
       text = "|cc5c29e" .. GetString(LOOTSANITIZER_MATERIALMOTIF_DESCRIPTION) .. "|r",
+    },
+    {
+      type = "description",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_MATERIALSTOP_DESCRIPTION) .. "|r",
     },
     {
       type = "description",
@@ -387,7 +396,7 @@ function LootSanitizer:AddSettingsMenu (defaults)
     },
     {
       type = "description",
-      text = "|cc5c29e" .. zo_strformat(GetString(LOOTSANITIZER_TRASH_DESCRIPTION), SPOILED_FOOD) .. "|r",
+      text = "|cc5c29e" .. zo_strformat(GetString(LOOTSANITIZER_TRASH_DESCRIPTION), FormattedPrice("1"), SPOILED_FOOD) .. "|r",
       enableLinks = true,
     },
     {
@@ -403,13 +412,28 @@ function LootSanitizer:AddSettingsMenu (defaults)
       type = "description",
       text = "|cc5c29e" .. GetString(LOOTSANITIZER_JUNK_DESCRIPTION) .. "|r",
     },
+    -- {
+    --   type = "checkbox",
+    --   name = GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL),
+    --   tooltip = GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_TOOLTIP),
+    --   default = defaults.junkNormalEquipment,
+    --   getFunc = function() return self.settings.junkNormalEquipment end,
+    --   setFunc = function(value) self.settings.junkNormalEquipment = value end,
+    -- },
     {
-      type = "checkbox",
+      type = "dropdown",
       name = GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL),
-      tooltip = GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_TOOLTIP),
-      default = defaults.junkNormalEquipment,
-      getFunc = function() return self.settings.junkNormalEquipment end,
-      setFunc = function(value) self.settings.junkNormalEquipment = value end,
+      choices = {
+        GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_OFF),
+        zo_strformat(GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_NORMAL), ITEM_Q1),
+        zo_strformat(GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_UNCOMMON), ITEM_Q2),
+        zo_strformat(GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_RARE), ITEM_Q3),
+        zo_strformat(GetString(LOOTSANITIZER_JUNK_COMMON_CONTROL_EPIC), ITEM_Q4)
+      },
+      choicesValues = {0, 1, 2, 3, 4},
+      default = defaults.junkNormalEquipmentQuality,
+      getFunc = function() return self.settings.junkNormalEquipmentQuality end,
+      setFunc = function(value) self.settings.junkNormalEquipmentQuality = value end,
     },
     {
       type = "checkbox",
@@ -497,6 +521,13 @@ function LootSanitizer:AddSettingsMenu (defaults)
     },
     {
       type = "checkbox",
+      name = GetString(LOOTSANITIZER_JUNK_BAIT_CONTROL),
+      default = defaults.junkBait,
+      getFunc = function() return self.settings.junkBait end,
+      setFunc = function(value) self.settings.junkBait = value end,
+    },
+    {
+      type = "checkbox",
       name = GetString(LOOTSANITIZER_JUNK_TROPHY_CONTROL),
       tooltip = GetString(LOOTSANITIZER_JUNK_TROPHY_CONTROL_TOOLTIP),
       default = defaults.junkMonsterTrophy,
@@ -509,16 +540,24 @@ function LootSanitizer:AddSettingsMenu (defaults)
       ]],
     },
     {
+      type = "description",
+      text = "|cc5c29e" .. GetString(LOOTSANITIZER_JUNK_AUTO_DESCRIPTION) .. "|r",
+    },
+    {
       type = "checkbox",
       name = GetString(LOOTSANITIZER_JUNK_AUTOSELL_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_AUTOSELL_TOOLTIP),
       default = defaults.autoJunkSell,
       getFunc = function() return self.settings.autoJunkSell end,
       setFunc = function(value) self.settings.autoJunkSell = value end,
-      disabled = true,
     },
     {
-      type = "description",
-      text = GetString(LOOTSANITIZER_JUNK_AUTOSELL_DESCRIPTION),
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_JUNK_RECIPE_AUTOLEARN_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_RECIPE_AUTOLEARN_TOOLTIP),
+      default = defaults.autoLearnJunkRecipes,
+      getFunc = function() return self.settings.autoLearnJunkRecipes end,
+      setFunc = function(value) self.settings.autoLearnJunkRecipes = value end,
     },
     {
       type = "description",
@@ -527,7 +566,15 @@ function LootSanitizer:AddSettingsMenu (defaults)
     },
     {
       type = "header",
-      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t AUTO-BURNED ITEMS",
+      name = "|t36:36:esoui/art/inventory/inventory_tabIcon_trash_up.dds|t " .. GetString(LOOTSANITIZER_AUTOBURN_HEADER),
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_DISPLAY_AUTOBURN_ACTION_CONTROL),
+      default = defaults.displayAutoBurnAction,
+      getFunc = function() return self.settings.displayAutoBurnAction end,
+      setFunc = function(value) self.settings.displayAutoBurnAction = value end,
+      disabled = true,
     },
     {
       type = "custom",

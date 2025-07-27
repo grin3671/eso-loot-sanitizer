@@ -1,0 +1,16 @@
+## TODO
+- [x] Automatic learning of recipes if they are marked as "Junk" **by addon**.
+- [x] Automatic selling of items from the "Junk" tab.
+- [x] Quality threshold for non-set items to be automatically marked as "Junk".
+- [ ] Removal of holiday items from the "April Jester" event.
+- [ ] Log to track items deletion and related reasons.
+- [ ] Saving provisions required for daily quests of min, current, and max trade levels (need to find item ID list).
+- [x] Option to hide auto-delete action from item context menu.
+- [ ] Chat function for switching addon `workMode`.
+- [ ] Function for adding/removing items from whitelist via context menu.
+- [ ] "Greed mode" for binding BoP items + full-screen warning when enabled upon joining a group.
+- [ ] (need some help) Fix English translation.
+- [ ] (need some help) `ZO_SortFilterList` of automatically removed items with option to remove items from the list.
+- [ ] (need some help) Profile in local settings: each character has a local "Profile" setting that references a global settings set.
+- [ ] (under consideration) Session item cache (table of ~500 item IDs) to speed up item checks + corresponding cleanup functions when full.
+- [ ] (under consideration) Simplify code. Replace repetitive names with `this`.

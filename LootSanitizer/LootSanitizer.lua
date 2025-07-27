@@ -2,7 +2,7 @@ LootSanitizer = {}
 
 local this = LootSanitizer
 this.name = "LootSanitizer"
-this.version = "0.18.0"
+this.version = "0.19.0"
 this.author = "grin3671"
 
 this.enabled = 1
@@ -18,6 +18,7 @@ local DEFAULT_SETTINGS =
   chatMode = 1,
   burnEquipment = false,
   burnEquipmentPrice = 1, -- english word used in inventory: value
+  burnSimpleClothes = false,
   burnCompanionItems = 0,
   burnRaceMaterial = 0,
   burnRaceMotif = 0,
@@ -36,7 +37,8 @@ local DEFAULT_SETTINGS =
   maxBurnedStack = 10,
   maxBurnedPrice = 100,
   autoBindQuality = 0,
-  junkNormalEquipment = false,
+  -- junkNormalEquipment = false,
+  junkNormalEquipmentQuality = 0,
   junkOrnateEquipment = false,
   junkMiddleRawAndMaterial = false,
   junkNotCraftedPotion = false,
@@ -48,9 +50,11 @@ local DEFAULT_SETTINGS =
   junkTrashItem = false,
   junkTreasureItem = false,
   junkRareFish = false,
+  junkBait = false,
   junkMonsterTrophy = false,
   autoJunkSell = false,
-  burnSimpleClothes = false,
+  autoLearnJunkRecipes = false,
+  displayAutoBurnAction = false,
   -- LibCustomMenu Values
   listOfJunk = {},
   listOfBurn = {}
@@ -166,8 +170,8 @@ function this:Initialize()
   EVENT_MANAGER:AddFilterForEvent(self.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
 
   -- Turn off/on addon on open/close vendors store to prevent destoing buyed items
-  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_OPEN_STORE, self.turnOff)
-  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_CLOSE_STORE, self.turnOn)
+  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_OPEN_STORE, self.f.OnStoreOpen) -- + EVENT_OPEN_FENCE
+  EVENT_MANAGER:RegisterForEvent(self.name, EVENT_CLOSE_STORE, self.f.TurnOn)
 end
 
 
@@ -323,7 +327,7 @@ function LootSanitizer:IsItemShouldBeDestroed(bagIndex, slotIndex, stackCountCha
   end
 
   -- -- // TODO: add itemCache
-  -- -- If an Item's check reaches this point, it's definitely better to add it to the itemCache
+  -- -- If an Item's check reaches this point, it's definitely? better to add it to the itemCache
   -- itemCache[strItemId] = {
   --   ["bool"] = false,
   --   ["reason"] = "R0",
@@ -378,7 +382,7 @@ function LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex)
 
   -- Not part of Sets
   local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkSetInfo(itemLink)
-  if self.settings.junkNormalEquipment and isPlayerEquip and hasSet == false then
+  if self.settings.junkNormalEquipmentQuality and itemQuality <= self.settings.junkNormalEquipmentQuality and isPlayerEquip and hasSet == false then
     if not isUnknownTrait and not isInspirationTrait then
       return true, "R101"
     end
@@ -420,53 +424,58 @@ function LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex)
   end
 
   -- Not crafted food
-  if self.settings.junkNotCraftedFood and itemType == 4 and itemRarity < 3 then
+  if self.settings.junkNotCraftedFood and itemType == ITEMTYPE_FOOD and itemRarity < 3 then
     return true, "R104"
   end
 
   -- Not crafted drink
-  if self.settings.junkNotCraftedDrink and itemType == 12 and itemRarity < 3 then
+  if self.settings.junkNotCraftedDrink and itemType == ITEMTYPE_DRINK and itemRarity < 3 then
     return true, "R105"
   end
 
   -- Not crafted potion
-  if self.settings.junkNotCraftedPotion and itemType == 7 and itemRarity < 3 then
+  if self.settings.junkNotCraftedPotion and itemType == ITEMTYPE_POTION and itemRarity < 3 then
     return true, "R106"
   end
 
   -- Not crafted poison
-  if self.settings.junkNotCraftedPoison and itemType == 30 and itemRarity < 3 then
+  if self.settings.junkNotCraftedPoison and itemType == ITEMTYPE_POISON and itemRarity < 3 then
     return true, "R107"
   end
 
   -- Potion solvent of any level
-  if self.settings.junkPotionSolvent and itemType == 33 then
+  if self.settings.junkPotionSolvent and itemType == ITEMTYPE_POTION_BASE then
     return true, "R108"
   end
 
   -- Poison solvent of any level
-  if self.settings.junkPoisonSolvent and itemType == 58 then
+  if self.settings.junkPoisonSolvent and itemType == ITEMTYPE_POISON_BASE then
     return true, "R109"
   end
 
   -- Trash items
-  if self.settings.junkTrashItem and itemType == 48 then
+  if self.settings.junkTrashItem and itemType == ITEMTYPE_TRASH then
     return true, "R110"
   end
 
   -- Treasure items
-  if self.settings.junkTreasureItem and itemType == 56 then
+  if self.settings.junkTreasureItem and itemType == ITEMTYPE_TREASURE then
     return true, "R111"
   end
 
   -- Rare fish
-  if self.settings.junkRareFish and itemSpecialType == 80 then
+  if self.settings.junkRareFish and itemSpecialType == SPECIALIZED_ITEMTYPE_COLLECTIBLE_RARE_FISH then
     return true, "R112"
   end
 
   -- Monster trophy
-  if self.settings.junkMonsterTrophy and itemSpecialType == 81 then
+  if self.settings.junkMonsterTrophy and itemSpecialType == SPECIALIZED_ITEMTYPE_COLLECTIBLE_MONSTER_TROPHY then
     return true, "R113"
+  end
+
+  -- Baits
+  if self.settings.junkBait and itemType == ITEMTYPE_LURE then
+    return true, "R114"
   end
 
   return false, "R0"
@@ -549,9 +558,9 @@ function LootSanitizer.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewI
   end
   if LootSanitizer.settings.chatMode == 2 and isBurn then
     if IsShiftKeyDown() then
-      d(zo_strformat("[<<1>>] Holding Shift prevents destroying of <<2>>.", GetString(LOOTSANITIZER_NAME), itemName))
+      d(zo_strformat(GetString(LOOTSANITIZER_MESSAGE_SHIFT_STOP_DESTROY), GetString(LOOTSANITIZER_NAME), itemName))
     elseif isItemTracked then
-      d(zo_strformat("[<<1>>] Item not burned coz <<2>> is tracked by addon MRL.", GetString(LOOTSANITIZER_NAME), itemName))
+      d(zo_strformat(GetString(LOOTSANITIZER_MESSAGE_ADDON_STOP_DESTROY), GetString(LOOTSANITIZER_NAME), itemName))
     end
   end
   if LootSanitizer.settings.chatMode == 2 and burnReason ~= "R0" then
@@ -559,13 +568,21 @@ function LootSanitizer.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewI
   end
 
 
+  -- Auto Learn Junk Recipes
+  if isJunk and LootSanitizer.settings.autoLearnJunkRecipes and itemType == ITEMTYPE_RECIPE and IsItemLinkRecipeKnown(itemLink) == false then
+    if CallSecureProtected("UseItem", bagIndex, slotIndex) then
+      d(zo_strformat(GetString(LOOTSANITIZER_MESSAGE_RECIPE_LEARN_SUCCESS), GetString(LOOTSANITIZER_NAME), itemName))
+    else
+      d(zo_strformat(GetString(LOOTSANITIZER_MESSAGE_RECIPE_LEARN_FAILURE), GetString(LOOTSANITIZER_NAME), itemName))
+    end
+  end
 
   -- JUNK
   if isJunk then
     LootSanitizer:SetItemJunk(bagIndex, slotIndex)
   end
   if LootSanitizer.settings.chatMode == 2 and junkReason ~= "R0" then
-    d(zo_strformat("[<<4>>] Is <<1>> junk: <<2>>. Reason: <<3>>.", itemName, tostring(isJunk), junkReason, GetString(LOOTSANITIZER_NAME)))
+    d(zo_strformat("[<<4>>] Is <<1>> a junk? Answer: <<2>>. Reason: <<3>>.", itemName, tostring(isJunk), junkReason, GetString(LOOTSANITIZER_NAME)))
   end
 
 end
@@ -607,15 +624,38 @@ function LootSanitizer:ShowStats()
 end
 
 
-function LootSanitizer:turnOff ()
-  LootSanitizer.enabled = 0
-  LootSanitizer:DebugTime("Store Open")
-end
-
-function LootSanitizer:turnOn ()
-  LootSanitizer.enabled = 1
-  LootSanitizer:DebugTime("Store Close")
-end
+-- list of additional functions
+this["f"] = {
+  ["OnStoreOpen"] = function ()
+    this.f.TurnOff() -- to prevent the destruction of purchased items
+    if this.settings.autoJunkSell and HasAnyJunk(BAG_BACKPACK, true) then
+      SellAllJunk()
+    end
+  end,
+  ["TurnOff"] = function ()
+    this.enabled = 0 -- prevent the destruction of purchased items
+    this:DebugTime("Store Open")
+  end,
+  ["TurnOn"] = function ()
+    this.enabled = 1
+    this:DebugTime("Store Close")
+  end,
+  -- @entryType [string] -- "destroy" or "bind" or "smth else" from msgType
+  -- @itemLink  [string] -- ESO's itemLink
+  -- @entryInfo [object] -- additional info like count or value
+  ["AddLogEntry"] = function(entryType, itemLink, entryInfo)
+    local msgType = {
+      ["delete"] = {
+        ["string"] = GetString(LOOTSANITIZER_NAME),
+        ["params"] = ""
+      },
+      ["bind"] = {},
+      ["auto_sell"] = {},
+      ["learn_success"] = {},
+      ["learn_failure"] = {},
+    }
+  end,
+}
 
 
 function LootSanitizer:DebugTime(text)
@@ -661,14 +701,16 @@ function this:AddContextMenu()
     end , "")
 
     -- List of Burn
-    local isInAccountBurnList, listBurnIndex = self.HasValue(self.settings.listOfBurn, itemLink);
-    slotActions:AddCustomSlotAction(isInAccountBurnList and LOOTSANITIZER_LCMACTION_BURN_OFF or LOOTSANITIZER_LCMACTION_BURN_ON, function()
-      if isInAccountBurnList == false then
-        self:addToList(self.settings.listOfBurn, itemLink)
-      else
-        self:removeFromList(self.settings.listOfBurn, listBurnIndex)
-      end
-    end , "")
+    if self.settings.displayAutoBurnAction then
+      local isInAccountBurnList, listBurnIndex = self.HasValue(self.settings.listOfBurn, itemLink);
+      slotActions:AddCustomSlotAction(isInAccountBurnList and LOOTSANITIZER_LCMACTION_BURN_OFF or LOOTSANITIZER_LCMACTION_BURN_ON, function()
+        if isInAccountBurnList == false then
+          self:addToList(self.settings.listOfBurn, itemLink)
+        else
+          self:removeFromList(self.settings.listOfBurn, listBurnIndex)
+        end
+      end , "")
+    end
   end
 
   LibCustomMenu:RegisterContextMenu(AddItem, LibCustomMenu.CATEGORY_LATE)
