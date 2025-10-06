@@ -58,11 +58,11 @@ function LootSanitizer:AddSettingsMenu (defaults)
     },
     {
       type = "dropdown",
-      name = GetString(LOOTSANITIZER_ITEM_CONTROL),
+      name = GetString(LOOTSANITIZER_WORKMODE_CONTROL),
       choices = {
-        GetString(LOOTSANITIZER_ITEM_CONTROL_NO),
-        GetString(LOOTSANITIZER_ITEM_CONTROL_AUTOLOOT),
-        GetString(LOOTSANITIZER_ITEM_CONTROL_ALWAYS)
+        GetString(LOOTSANITIZER_WORKMODE_CONTROL_NO),
+        GetString(LOOTSANITIZER_WORKMODE_CONTROL_AUTOLOOT),
+        GetString(LOOTSANITIZER_WORKMODE_CONTROL_ALWAYS)
       },
       choicesValues = {0, 1, 2},
       default = defaults.workMode,
@@ -81,6 +81,13 @@ function LootSanitizer:AddSettingsMenu (defaults)
       default = defaults.chatMode,
       getFunc = function() return self.settings.chatMode end,
       setFunc = function(value) self.settings.chatMode = value end,
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_SOUND_CONTROL),
+      default = defaults.playSound,
+      getFunc = function() return self.settings.playSound end,
+      setFunc = function(value) self.settings.playSound = value end,
     },
     {
       type = "description",
@@ -129,9 +136,9 @@ function LootSanitizer:AddSettingsMenu (defaults)
       name = GetString(LOOTSANITIZER_SETS_CONTROL),
       choices = {
         GetString(LOOTSANITIZER_SETS_CONTROL_NO),
-        GetString(LOOTSANITIZER_SETS_CONTROL_GREEN),
-        GetString(LOOTSANITIZER_SETS_CONTROL_BLUE),
-        GetString(LOOTSANITIZER_SETS_CONTROL_PURPLE)
+        zo_strformat(GetString(LOOTSANITIZER_SETS_CONTROL_GREEN), ITEM_Q2),
+        zo_strformat(GetString(LOOTSANITIZER_SETS_CONTROL_BLUE), ITEM_Q3),
+        zo_strformat(GetString(LOOTSANITIZER_SETS_CONTROL_PURPLE), ITEM_Q4)
       },
       choicesValues = {0, 2, 3, 4},
       default = defaults.autoBindQuality,
@@ -157,9 +164,9 @@ function LootSanitizer:AddSettingsMenu (defaults)
       name = GetString(LOOTSANITIZER_COMPANION_CONTROL),
       choices = {
         GetString(LOOTSANITIZER_COMPANION_CONTROL_NO),
-        GetString(LOOTSANITIZER_COMPANION_CONTROL_WHITE),
-        GetString(LOOTSANITIZER_COMPANION_CONTROL_GREEN),
-        GetString(LOOTSANITIZER_COMPANION_CONTROL_BLUE)
+        zo_strformat(GetString(LOOTSANITIZER_COMPANION_CONTROL_WHITE), ITEM_Q1),
+        zo_strformat(GetString(LOOTSANITIZER_COMPANION_CONTROL_GREEN), ITEM_Q2),
+        zo_strformat(GetString(LOOTSANITIZER_COMPANION_CONTROL_BLUE), ITEM_Q3)
       },
       choicesValues = {0, 1, 2, 3},
       default = defaults.burnCompanionItems,
@@ -533,6 +540,22 @@ function LootSanitizer:AddSettingsMenu (defaults)
       default = defaults.junkMonsterTrophy,
       getFunc = function() return self.settings.junkMonsterTrophy end,
       setFunc = function(value) self.settings.junkMonsterTrophy = value end,
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_JUNK_EXCESS_REPAIRKIT_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_EXCESS_REPAIRKIT_TOOLTIP),
+      default = defaults.junkExcessRepairKit,
+      getFunc = function() return self.settings.junkExcessRepairKit end,
+      setFunc = function(value) self.settings.junkExcessRepairKit = value end,
+    },
+    {
+      type = "checkbox",
+      name = GetString(LOOTSANITIZER_JUNK_EXCESS_SOULGEM_CONTROL),
+      tooltip = GetString(LOOTSANITIZER_JUNK_EXCESS_SOULGEM_TOOLTIP),
+      default = defaults.junkExcessSoulgem,
+      getFunc = function() return self.settings.junkExcessSoulgem end,
+      setFunc = function(value) self.settings.junkExcessSoulgem = value end,
     },
     {
       type = "description",

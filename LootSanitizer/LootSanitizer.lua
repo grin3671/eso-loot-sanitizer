@@ -2,7 +2,7 @@ LootSanitizer = {}
 
 local this = LootSanitizer
 this.name = "LootSanitizer"
-this.version = "0.19.0"
+this.version = "0.20.0"
 this.author = "grin3671"
 
 this.enabled = 1
@@ -16,6 +16,7 @@ local DEFAULT_SETTINGS =
 {
   workMode = 0,
   chatMode = 1,
+  playSound = true,
   burnEquipment = false,
   burnEquipmentPrice = 1, -- english word used in inventory: value
   burnSimpleClothes = false,
@@ -52,6 +53,8 @@ local DEFAULT_SETTINGS =
   junkRareFish = false,
   junkBait = false,
   junkMonsterTrophy = false,
+  junkExcessRepairKit = false,
+  junkExcessSoulgem = false,
   autoJunkSell = false,
   autoLearnJunkRecipes = false,
   displayAutoBurnAction = false,
@@ -338,8 +341,9 @@ function LootSanitizer:IsItemShouldBeDestroed(bagIndex, slotIndex, stackCountCha
 end
 
 
-function LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex)
+function LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex, stackCountChange)
   local itemLink = GetItemLink(bagIndex, slotIndex)
+  local itemId = GetItemLinkItemId(itemLink)
 
   -- Don't do anything with Crown and Crafted items
   local isCrownCrate = IsItemFromCrownCrate(bagIndex, slotIndex)
@@ -478,6 +482,16 @@ function LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex)
     return true, "R114"
   end
 
+  -- Repair Kits
+  if self.settings.junkExcessRepairKit and itemId == 44879 and GetItemLinkStacks(itemLink) >= 200 and GetSlotStackSize(bagIndex, slotIndex) == stackCountChange then
+    return true, "R115"
+  end
+
+  -- Soul Gems
+  if self.settings.junkExcessSoulgem and itemId == 33271 and GetItemLinkStacks(itemLink) >= 200 and GetSlotStackSize(bagIndex, slotIndex) == stackCountChange then
+    return true, "R116"
+  end
+
   return false, "R0"
 end
 
@@ -554,7 +568,7 @@ function LootSanitizer.OnInventoryChanged(eventCode, bagIndex, slotIndex, isNewI
     end
   else
     -- JUNK
-    isJunk, junkReason = LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex)
+    isJunk, junkReason = LootSanitizer:IsItemShouldBeMarkedAsJunk(bagIndex, slotIndex, stackCountChange)
   end
   if LootSanitizer.settings.chatMode == 2 and isBurn then
     if IsShiftKeyDown() then
@@ -589,16 +603,20 @@ end
 
 
 
--- Sounds
--- SKILL_PURCHASED / BOOK_ACQUIRED / LOCKPICKING_BREAK
+
+
 function LootSanitizer:DestroyItem(bagIndex, slotIndex)
   DestroyItem(bagIndex, slotIndex)
-  PlaySound(SOUNDS.INVENTORY_DESTROY_JUNK)
+  if self.settings.playSound then
+    PlaySound(SOUNDS.INVENTORY_DESTROY_JUNK)
+  end
 end
--- SKILL_PURCHASED / BOOK_ACQUIRED / LOCKPICKING_BREAK
+
 function LootSanitizer:SetItemJunk(bagIndex, slotIndex)
   SetItemIsJunk(bagIndex, slotIndex, true)
-  PlaySound(SOUNDS.INVENTORY_ITEM_UNJUNKED)
+  if self.settings.playSound then
+    PlaySound(SOUNDS.INVENTORY_ITEM_UNJUNKED) -- SKILL_PURCHASED / BOOK_ACQUIRED / LOCKPICKING_BREAK
+  end
 end
 
 function LootSanitizer:CloseMotifBook()
@@ -738,6 +756,87 @@ function LootSanitizer:test()
   local itemId = 33150
   d(tostring(itemData.trashRaceMaterial[tostring(itemId)]))
   d(ZO_Currency_FormatGamepad(CURT_MONEY, 3, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+
+  local function ShowTextInputDialog(titleText, bodyText, callbackFunction)
+    -- Создаем параметры диалогового окна
+    local dialogName = "MyTextInputDialog"
+    local dialog = ZO_Dialogs_FindDialog(dialogName)
+    
+    if not dialog then
+        -- Функция для создания элементов управления диалогового окна
+        local function CreateTextInputDialog()
+            local dialog = ZO_KeyboardInputDialog:New("MyTextInputDialogDialog")
+            
+            -- Добавляем поле ввода текста
+            local editControl = CreateControlFromVirtual("$(parent)Edit", dialog, "ZO_DefaultEditForBackdrop") -- 
+            editControl:SetAnchor(TOP, dialog.text, BOTTOM, 0, 20)
+            editControl:SetDimensions(300, 30)
+            editControl:SetMaxInputChars(100)
+            
+            -- Настраиваем обработчик нажатия Enter
+            editControl:SetHandler("OnEnter", function(self)
+                local dialog = ZO_Dialogs_FindDialog("MyTextInputDialog")
+                if dialog then
+                    local submitButton = dialog.buttons[1].control
+                    submitButton:Click()
+                end
+            end)
+            
+            dialog.edit = editControl
+            dialog:SetHandler("OnEffectivelyShown", function(self)
+                self.edit:TakeFocus()
+            end)
+            
+            return dialog
+        end
+        -- Создаем новое диалоговое окно, если оно еще не существует
+        ZO_Dialogs_RegisterCustomDialog(dialogName,
+        {
+            -- customControl = function() return CreateTextInputDialog() end,
+            title =
+            {
+                text = titleText or "Input Text"
+            },
+            mainText = 
+            {
+                text = bodyText or "Please enter text:"
+            },
+            buttons =
+            {
+                {
+                    -- control = GetButton("Submit"),
+                    text = SI_DIALOG_CONFIRM,
+                    keybind = "DIALOG_PRIMARY",
+                    callback = function(dialog)
+                        -- local editControl = dialog:GetNamedChild("Edit")
+                        -- local text = editControl:GetText()
+                        -- callbackFunction(text)
+                    end
+                },
+                {
+                    -- control = GetButton("Cancel"),
+                    text = SI_DIALOG_CANCEL,
+                    keybind = "DIALOG_NEGATIVE",
+                    callback = function(dialog)
+                        callbackFunction(nil)
+                    end
+                }
+            }
+        })
+    end
+    
+    -- Показываем диалоговое окно
+    ZO_Dialogs_ShowDialog(dialogName)
+  end
+
+  --
+  ShowTextInputDialog("Enter your name", "Please enter your character name:", function(result)
+      if result then
+          d("You entered: " .. result)
+      else
+          d("Input was cancelled")
+      end
+  end)
 end
 
 

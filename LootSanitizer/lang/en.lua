@@ -17,15 +17,17 @@ ZO_CreateStringId("LOOTSANITIZER_MESSAGE_RECIPE_LEARN_FAILURE"    , "[<<1>>] cou
 ZO_CreateStringId("LOOTSANITIZER_MESSAGE_SHIFT_STOP_DESTROY"      , "[<<1>>] averts destroying of <<2>> by holding Shift.") -- 1:addonName 2:itemLink
 ZO_CreateStringId("LOOTSANITIZER_MESSAGE_ADDON_STOP_DESTROY"      , "[<<1>>] averts destroying of <<2>> due to MRL addon tracking.") -- 1:addonName 2:itemLink
 
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL"                    , "Delete trash items")
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL_NO"                 , "Nope")
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL_AUTOLOOT"           , "Only at Autoloot")
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL_ALWAYS"             , "Always")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL"                , "Addon handles items")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL_NO"             , "Never")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL_AUTOLOOT"       , "Only at Autoloot")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL_ALWAYS"         , "Always")
 
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY"                     , "Chat notifications")
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY_NO"                  , "Disabled")
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY_DELETE"              , "About deletion")
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY_DEV"                 , "Developer mode")
+
+ZO_CreateStringId("LOOTSANITIZER_SOUND_CONTROL"                   , "Sound notifications")
 
 ZO_CreateStringId("LOOTSANITIZER_EQUIPMENT_HEADER"                , "Equipment")
 ZO_CreateStringId("LOOTSANITIZER_EQUIPMENT_CONTROL"               , "Delete simple equipment")
@@ -37,17 +39,17 @@ ZO_CreateStringId("LOOTSANITIZER_SIMPLECLOTHES_DESCRIPTION"       , "Clothes is 
 ZO_CreateStringId("LOOTSANITIZER_SETS_HEADER"                     , GetString(SI_ITEM_SETS_BOOK_TITLE))
 ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL"                    , "Auto-Binding")
 ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_NO"                 , "Disabled")
-ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_GREEN"              , "Only Green quality")
-ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_BLUE"               , "Blue and lower")
-ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_PURPLE"             , "Purple and lower")
+ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_GREEN"              , "Only <<1>> quality") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_BLUE"               , "<<1>> and lower") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_PURPLE"             , "<<1>> and lower") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_SETS_DESCRIPTION"                , "Automatically bind new equipment of the selected quality to add it to the collection. Does not affect on BoP items.")
 
 ZO_CreateStringId("LOOTSANITIZER_COMPANION_HEADER"                , GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_COMPANION))
 ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL"               , "Removing companion items")
 ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_NO"            , "Disabled")
-ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_WHITE"         , "Only White quality")
-ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_GREEN"         , "Green and lower")
-ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_BLUE"          , "Blue and lower")
+ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_WHITE"         , "Only <<1>> quality") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_GREEN"         , "<<1>> and lower") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_BLUE"          , "<<1>> and lower") -- 1:itemQuality
 
 ZO_CreateStringId("LOOTSANITIZER_MATERIALMOTIF_HEADER"            , "Style materials and motifs")
 ZO_CreateStringId("LOOTSANITIZER_MATERIAL_CONTROL"                , "Delete style materials")
@@ -104,7 +106,7 @@ ZO_CreateStringId("LOOTSANITIZER_JUNK_DESCRIPTION"                , "Automatical
 
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL"             , "Regular Equipment")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_OFF"         , "Disabled")
-ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_NORMAL"      , "Only <<1>>") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_NORMAL"      , "Only <<1>> quality") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_UNCOMMON"    , "<<1>> and lower") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_RARE"        , "<<1>> and lower") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_EPIC"        , "<<1>> and lower") -- 1:itemQuality
@@ -130,6 +132,10 @@ ZO_CreateStringId("LOOTSANITIZER_JUNK_RFISH_CONTROL_TOOLTIP"      , "Items from 
 ZO_CreateStringId("LOOTSANITIZER_JUNK_BAIT_CONTROL"               , "Baits")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_TROPHY_CONTROL"             , "Monster Trophy")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_TROPHY_CONTROL_TOOLTIP"     , "Items from the Monster Trophy category, intended for sale to merchants.")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_REPAIRKIT_CONTROL"   , "Excess Repair Kits")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_REPAIRKIT_TOOLTIP"   , "Excess Repair Kits will be considered those that were received after collecting 1 full stack.")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_SOULGEM_CONTROL"     , "Excess Soul Gems")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_SOULGEM_TOOLTIP"     , "Excess Soul Gems will be considered those that were received after collecting 1 full stack.")
 
 ZO_CreateStringId("LOOTSANITIZER_JUNK_AUTO_DESCRIPTION"           , "Auto-actions with items from the Junk tab.")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_AUTOSELL_CONTROL"           , "Auto Sale")
@@ -137,9 +143,9 @@ ZO_CreateStringId("LOOTSANITIZER_JUNK_AUTOSELL_TOOLTIP"           , "Automatic s
 ZO_CreateStringId("LOOTSANITIZER_JUNK_RECIPE_AUTOLEARN_CONTROL"   , "Auto Learn Recipes")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_RECIPE_AUTOLEARN_TOOLTIP"   , "Automatically learn recipes that addon marked as junk.")
 
-ZO_CreateStringId("LOOTSANITIZER_AUTOBURN_HEADER"                 , "AUTO-BURNED ITEMS")
+ZO_CreateStringId("LOOTSANITIZER_AUTOBURN_HEADER"                 , "Auto-destroying items")
 ZO_CreateStringId("LOOTSANITIZER_DISPLAY_AUTOBURN_ACTION_CONTROL" , "Display auto-destroy action")
-ZO_CreateStringId("LOOTSANITIZER_DISPLAY_AUTOBURN_ACTION_TOOLTIP" , "Action display in submenu of items.")
+ZO_CreateStringId("LOOTSANITIZER_DISPLAY_AUTOBURN_ACTION_TOOLTIP" , "Action display in context menu of items.")
 
 ZO_CreateStringId("LOOTSANITIZER_COMMAND_HEADER"                  , "Chat Commands")
 ZO_CreateStringId("LOOTSANITIZER_COMMAND_DESCRIPTION"             , "Chat commands to help you interact with the addon.")

@@ -17,15 +17,17 @@ ZO_CreateStringId("LOOTSANITIZER_MESSAGE_RECIPE_LEARN_FAILURE"    , "[<<1>>] н�
 ZO_CreateStringId("LOOTSANITIZER_MESSAGE_SHIFT_STOP_DESTROY"      , "[<<1>>] не стал удалять <<2>> из-за удерживания клавиши Shift.") -- 1:addonName 2:itemLink
 ZO_CreateStringId("LOOTSANITIZER_MESSAGE_ADDON_STOP_DESTROY"      , "[<<1>>] не стал удалять <<2>> из-за отслеживания аддоном MRL.") -- 1:addonName 2:itemLink
 
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL"                    , "Режим удаления предметов")
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL_NO"                 , "Отключено")
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL_AUTOLOOT"           , "Только при автосборе")
-ZO_CreateStringId("LOOTSANITIZER_ITEM_CONTROL_ALWAYS"             , "Всегда")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL"                , "Режим удаления предметов")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL_NO"             , "Отключено")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL_AUTOLOOT"       , "Только при автосборе")
+ZO_CreateStringId("LOOTSANITIZER_WORKMODE_CONTROL_ALWAYS"         , "Всегда")
 
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY"                     , "Уведомления в чате")
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY_NO"                  , "Отключены")
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY_DELETE"              , "Только о удалении")
 ZO_CreateStringId("LOOTSANITIZER_CHAT_NOTIFY_DEV"                 , "Режим разработчика")
+
+ZO_CreateStringId("LOOTSANITIZER_SOUND_CONTROL"                   , "Звуковые оповещения")
 
 ZO_CreateStringId("LOOTSANITIZER_EQUIPMENT_HEADER"                , "Экипировка")
 ZO_CreateStringId("LOOTSANITIZER_EQUIPMENT_CONTROL"               , "Удаление простой экипировки")
@@ -37,17 +39,17 @@ ZO_CreateStringId("LOOTSANITIZER_SIMPLECLOTHES_DESCRIPTION"       , "Одежд�
 ZO_CreateStringId("LOOTSANITIZER_SETS_HEADER"                     , GetString(SI_ITEM_SETS_BOOK_TITLE))
 ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL"                    , "Автоматическая привязка")
 ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_NO"                 , "Отключено")
-ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_GREEN"              , "Только зелёные предметы")
-ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_BLUE"               , "Синие и ниже")
-ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_PURPLE"             , "Фиолетовые и ниже")
+ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_GREEN"              , "Только <<1>> качество") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_BLUE"               , "<<1>> и ниже") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_SETS_CONTROL_PURPLE"             , "<<1>> и ниже") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_SETS_DESCRIPTION"                , "Автоматически привязывать новую экипировку выбранного качества для добавления в коллекцию. Не влияет на BoP-предметы.")
 
 ZO_CreateStringId("LOOTSANITIZER_COMPANION_HEADER"                , GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_COMPANION))
 ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL"               , "Удаление предметов спутников")
 ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_NO"            , "Отключено")
-ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_WHITE"         , "Только белые")
-ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_GREEN"         , "Зеленые и ниже")
-ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_BLUE"          , "Синие и ниже")
+ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_WHITE"         , "Только <<1>> качество") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_GREEN"         , "<<1>> и ниже") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_COMPANION_CONTROL_BLUE"          , "<<1>> и ниже") -- 1:itemQuality
 
 ZO_CreateStringId("LOOTSANITIZER_MATERIALMOTIF_HEADER"            , "Материалы стилей и мотивы")
 ZO_CreateStringId("LOOTSANITIZER_MATERIAL_CONTROL"                , "Удаление материалов стилей")
@@ -104,7 +106,7 @@ ZO_CreateStringId("LOOTSANITIZER_JUNK_DESCRIPTION"                , "Автом�
 
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL"             , "Простая экипировка")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_OFF"         , "Отключено")
-ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_NORMAL"      , "Только <<1>>") -- 1:itemQuality
+ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_NORMAL"      , "Только <<1>> качество") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_UNCOMMON"    , "<<1>> и ниже") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_RARE"        , "<<1>> и ниже") -- 1:itemQuality
 ZO_CreateStringId("LOOTSANITIZER_JUNK_COMMON_CONTROL_EPIC"        , "<<1>> и ниже") -- 1:itemQuality
@@ -130,6 +132,10 @@ ZO_CreateStringId("LOOTSANITIZER_JUNK_RFISH_CONTROL_TOOLTIP"      , "Предм�
 ZO_CreateStringId("LOOTSANITIZER_JUNK_BAIT_CONTROL"               , "Наживка")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_TROPHY_CONTROL"             , "Трофей с монстров")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_TROPHY_CONTROL_TOOLTIP"     , "Предметы из категории «Трофей с монстров», предназначенные для продажи торговцам.")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_REPAIRKIT_CONTROL"   , "Лишние ремонтные наборы")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_REPAIRKIT_TOOLTIP"   , "Лишними ремонтными наборами считаются полученные после сбора 1 полного стака.")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_SOULGEM_CONTROL"     , "Лишние камни душ")
+ZO_CreateStringId("LOOTSANITIZER_JUNK_EXCESS_SOULGEM_TOOLTIP"     , "Лишними камнями душ считаются полученные после сбора 1 полного стака.")
 
 ZO_CreateStringId("LOOTSANITIZER_JUNK_AUTO_DESCRIPTION"           , "Автоматизация действий с предметами из вкладки «Хлам».")
 ZO_CreateStringId("LOOTSANITIZER_JUNK_AUTOSELL_CONTROL"           , "Автоматическая продажа")

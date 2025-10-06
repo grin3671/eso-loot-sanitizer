@@ -1,9 +1,9 @@
 ## Title: LootSanitizer
-## APIVersion: 101046 101047
+## APIVersion: 101047
 ## Description: Sanitize looted trash and zero-price items.
 ## Author: grin3671
-## Version: 0.19.0
-## AddOnVersion: 19
+## Version: 0.20.0
+## AddOnVersion: 20
 ## SavedVariables: LootSanitizerSavedVariables
 ## OptionalDependsOn: LibAddonMenu-2.0>=40
 
